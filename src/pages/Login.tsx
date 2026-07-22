@@ -67,7 +67,7 @@ export default function Login() {
           />
 
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-            Cybence Scheduler
+            Cybence IT Solutions Scheduler
           </h1>
           <p className="mt-2 text-sm font-medium text-slate-500">
             {isForgotMode ? "Reset your account password" : "Sign in to continue"}
