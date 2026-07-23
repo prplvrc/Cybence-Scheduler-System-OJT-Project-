@@ -2,9 +2,13 @@ import { useState } from "react";
 import { User, Lock, Eye, EyeOff, AlertCircle, ArrowLeft, Mail } from "lucide-react";
 import logo from "../assets/cybence-logo.png";
 
-export default function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+type LoginProps = {
+  onLoginSuccess: () => void;
+};
+
+export default function Login({ onLoginSuccess }: LoginProps) {
+  const [username, setUsername] = useState("admin");
+  const [password, setPassword] = useState("admin123");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -21,9 +25,16 @@ export default function Login() {
     setError(null);
 
     setTimeout(() => {
-      console.log({ username, password, rememberMe });
+      if (username.trim() === "admin" && password === "admin123") {
+        console.log({ username, password, rememberMe });
+        setIsLoading(false);
+        onLoginSuccess();
+        return;
+      }
+
       setIsLoading(false);
-    }, 1500);
+      setError("Invalid username or password. Please use the demo credentials shown below.");
+    }, 1200);
   };
 
   const handleResetPassword = (e: React.FormEvent) => {
@@ -143,6 +154,10 @@ export default function Login() {
               >
                 Forgot password?
               </button>
+            </div>
+
+            <div className="rounded-xl border border-sky-100 bg-sky-50/80 px-3 py-2 text-[11px] text-slate-600">
+              <span className="font-semibold text-slate-800">Demo login:</span> username <span className="font-semibold text-slate-800">admin</span> / password <span className="font-semibold text-slate-800">admin123</span>
             </div>
 
             {/* Submit Button - Slimmer padding */}
