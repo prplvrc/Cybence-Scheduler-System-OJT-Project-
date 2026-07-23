@@ -1,4 +1,5 @@
 import {
+  ArrowLeft,
   BadgeCheck,
   Briefcase,
   CalendarDays,
@@ -31,7 +32,11 @@ const schedule = [
   { day: "Friday", time: "11:30 AM - Training Session" },
 ];
 
-export default function ProfilePage() {
+type ProfilePageProps = {
+  onBackToDashboard: () => void;
+};
+
+export default function ProfilePage({ onBackToDashboard }: ProfilePageProps) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-50 p-4 sm:p-6 lg:p-8">
 
@@ -81,6 +86,15 @@ export default function ProfilePage() {
             </div>
 
             <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={onBackToDashboard}
+                className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Exit
+              </button>
+
               <button className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 cursor-pointer">
                 <Edit3 className="h-4 w-4" />
                 Edit Profile
