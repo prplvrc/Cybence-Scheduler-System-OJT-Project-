@@ -6,29 +6,7 @@
   background: #f3f7fb;
   color:#222;
 }
-.calendar-page .sidebar{
-  width:240px;
-  background: #fff;
-  border-right: 1px solid #e6eef6;
-  padding:24px 18px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-}
-.calendar-page .brand{display:flex;align-items:center;gap:12px}
-.calendar-page .logo{width:46px;height:46px;border-radius:10px;background:#e8f2ff;color:#1a73e8;display:flex;align-items:center;justify-content:center;font-weight:700}
-.calendar-page .brand-text .title{font-weight:700}
-.calendar-page .brand-text .subtitle{font-size:12px;color:#6b7280}
-.calendar-page .nav{margin-top:24px}
-.calendar-page .nav ul{list-style:none;padding:0;margin:0}
-.calendar-page .nav-item{padding:10px 8px;border-radius:6px;color:#374151}
-.calendar-page .nav-item.active{background:#f3f7fb;border-left:3px solid #1f6feb}
-.calendar-page .account{margin-top:18px}
-.calendar-page .account-title{font-size:12px;color:#9aa6b2;margin-bottom:8px}
-.calendar-page .user-mini{display:flex;align-items:center;gap:12px;margin-top:28px}
-.calendar-page .avatar{width:44px;height:44px;border-radius:50%;background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:center}
-.calendar-page .user-info .name{font-weight:600}
-.calendar-page .user-info .role{font-size:12px;color:#6b7280}
+/* Calendar no longer renders its own sidebar to avoid duplication with app layout */
 
 .calendar-page .main-area{flex:1;padding:20px}
 .calendar-page .page-header{display:flex;justify-content:space-between;align-items:center;padding:10px 8px}
@@ -52,6 +30,5 @@
 .calendar-page .task-assignee{font-size:13px;color:#6b7280;margin-top:6px}
 
 @media (max-width:900px){
-  .calendar-page .sidebar{display:none}
   .calendar-page .right-panel{display:none}
 }
