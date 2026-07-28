@@ -25,7 +25,7 @@ export default function Calendar() {
             <span className="dot">•</span>
             <span className="time-str">12:00:00 PM</span>
           </div>
-          <button className="btn-primary">+ NEW TASK</button>
+          <button className="btn-primary">+ New Task</button>
         </div>
       </header>
 

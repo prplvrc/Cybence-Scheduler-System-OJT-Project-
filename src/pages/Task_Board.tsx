@@ -28,7 +28,7 @@ interface TaskGroup {
 
 const taskGroups: TaskGroup[] = [
   {
-    title: "TO BE ASSIGNED",
+    title: "To Be Assigned",
     dotClass: "dot-pending",
     badgeClass: "badge-pending",
     tasks: [
@@ -51,7 +51,7 @@ const taskGroups: TaskGroup[] = [
     ],
   },
   {
-    title: "TO-DO",
+    title: "To Do",
     dotClass: "dot-todo",
     badgeClass: "badge-todo",
     tasks: [
@@ -74,7 +74,7 @@ const taskGroups: TaskGroup[] = [
     ],
   },
   {
-    title: "ONGOING",
+    title: "Ongoing",
     dotClass: "dot-progress",
     badgeClass: "badge-progress",
     tasks: [
@@ -97,7 +97,7 @@ const taskGroups: TaskGroup[] = [
     ],
   },
   {
-    title: "COMPLETED",
+    title: "Completed",
     dotClass: "dot-completed",
     badgeClass: "badge-done",
     tasks: [
@@ -120,7 +120,7 @@ const taskGroups: TaskGroup[] = [
     ],
   },
   {
-    title: "UNFINISHED",
+    title: "Unfinished",
     dotClass: "dot-unfinished",
     badgeClass: "badge-unfinished",
     tasks: [
@@ -169,7 +169,7 @@ export default function TaskBoard() {
             <Bell size={18} />
           </button>
 
-          <button className="btn-primary">+ NEW TASK</button>
+          <button className="btn-primary">+ New Task</button>
         </div>
       </header>
 

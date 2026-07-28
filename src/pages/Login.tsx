@@ -169,7 +169,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               {isLoading ? (
                 <>
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  <span>Signing in...</span>
+                  <span>Signing In...</span>
                 </>
               ) : (
                 "Sign In"
@@ -225,7 +225,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   {isLoading ? (
                     <>
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      <span>Sending link...</span>
+                      <span>Sending Link...</span>
                     </>
                   ) : (
                     "Send Reset Link"

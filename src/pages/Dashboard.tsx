@@ -39,7 +39,7 @@ const teamMembers = [
 const recentTasks = [
   { id: "1", title: "Task 1", date: "2026-07-07", status: "Completed" },
   { id: "2", title: "Task 2", date: "2026-07-07", status: "Ongoing" },
-  { id: "3", title: "Task 3", date: "2026-07-07", status: "To do" },
+  { id: "3", title: "Task 3", date: "2026-07-07", status: "To Do" },
 ];
 
 export default function DashboardPage() {
@@ -213,7 +213,7 @@ export default function DashboardPage() {
               />
               <StatCard
                 value="2"
-                title="To do"
+                title="To Do"
                 subtitle="Not yet started"
                 icon={<Clock className="h-5 w-5 text-amber-600" />}
                 bg="bg-amber-50"
