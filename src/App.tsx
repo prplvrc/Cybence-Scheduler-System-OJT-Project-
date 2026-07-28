@@ -17,7 +17,7 @@ function App() {
   }
 
   if (currentPage === "dashboard") {
-    return <Dashboard onOpenProfile={() => setCurrentPage("profile")} onOpenCalendar={() => setCurrentPage("calendar")} />;
+    return <Dashboard />;
   }
 
   if (currentPage === "calendar") {

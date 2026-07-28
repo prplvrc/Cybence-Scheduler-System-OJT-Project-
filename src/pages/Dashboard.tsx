@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   LayoutDashboard,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 import ProfilePage from "./Profile_Page";
 import CalendarPage from "./Calendar";
+import TaskBoard from "./Task_Board";
 
 const weeklyData = [
   { day: "Mon", value: 4 },
@@ -88,7 +90,7 @@ export default function DashboardPage() {
                 />
                 <SidebarItem
                   icon={<CheckSquare size={18} />}
-                  label="Tasks"
+                  label="Task"
                   active={activeTab === "tasks"}
                   onClick={() => setActiveTab("tasks")}
                 />
@@ -162,6 +164,8 @@ export default function DashboardPage() {
           <ProfilePage onBackToDashboard={() => setActiveTab("dashboard")} />
         ) : activeTab === "calendar" ? (
           <CalendarPage />
+        ) : activeTab === "tasks" ? (
+          <TaskBoard />
         ) : (
           <>
             {/* HEADER BAR */}
@@ -190,7 +194,7 @@ export default function DashboardPage() {
                     <Bell className="h-4 w-4" />
                   </button>
 
-                  <button className="flex items-center gap-2 rounded-2xl bg-[#106fb8] px-5 py-3 text-sm font-semibold text-white shadow-md shadow-[#106fb8]/20 transition-all hover:bg-[#0e5ea4] hover:shadow-lg hover:shadow-[#106fb8]/30 hover:-translate-y-0.5 cursor-pointer">
+                  <button onClick={() => setActiveTab("tasks")} className="flex items-center gap-2 rounded-2xl bg-[#106fb8] px-5 py-3 text-sm font-semibold text-white shadow-md shadow-[#106fb8]/20 transition-all hover:bg-[#0e5ea4] hover:shadow-lg hover:shadow-[#106fb8]/30 hover:-translate-y-0.5 cursor-pointer">
                     <Plus className="h-4 w-4" />
                     <span>New Task</span>
                   </button>
@@ -298,7 +302,7 @@ export default function DashboardPage() {
                   <h2 className="text-lg font-bold text-slate-900">
                     Recent Tasks
                   </h2>
-                  <button className="flex items-center gap-1 text-xs font-semibold text-[#106fb8] hover:underline cursor-pointer">
+                  <button onClick={() => setActiveTab("tasks")} className="flex items-center gap-1 text-xs font-semibold text-[#106fb8] hover:underline cursor-pointer">
                     View Board <ArrowRight className="h-3.5 w-3.5" />
                   </button>
                 </div>
