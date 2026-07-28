@@ -19,6 +19,7 @@ import {
 import ProfilePage from "./Profile_Page";
 import CalendarPage from "./Calendar";
 import TaskBoard from "./Task_Board";
+import RequestsPage from "./Requests";
 import SettingsPage from "./Settings";
 
 const weeklyData = [
@@ -167,6 +168,8 @@ export default function DashboardPage() {
           <CalendarPage />
         ) : activeTab === "tasks" ? (
           <TaskBoard />
+        ) : activeTab === "requests" ? (
+          <RequestsPage />
         ) : activeTab === "settings" ? (
           <SettingsPage />
         ) : (
