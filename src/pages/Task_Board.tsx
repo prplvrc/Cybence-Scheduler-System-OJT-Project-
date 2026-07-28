@@ -175,6 +175,7 @@ export default function TaskBoard() {
 
       {/* Clean Toolbar Section */}
       <div className="toolbar-section">
+        <div className="search-box">
           <Search size={16} className="search-icon" />
           <input
             type="text"
@@ -182,6 +183,7 @@ export default function TaskBoard() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+        </div>
       </div>
 
       {/* Accordion List Sections */}

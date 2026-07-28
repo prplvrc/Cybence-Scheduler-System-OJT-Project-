@@ -134,6 +134,7 @@
   left: 12px;
   color: #94a3b8;
   pointer-events: none;
+  z-index: 1;
 }
 
 /* Accordion Group Cards */
