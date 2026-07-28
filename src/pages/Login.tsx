@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { FormEvent } from "react";
 import { User, Lock, Eye, EyeOff, AlertCircle, ArrowLeft, Mail } from "lucide-react";
 import logo from "../assets/cybence-logo.png";
 
@@ -19,7 +20,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [resetEmail, setResetEmail] = useState("");
   const [resetSent, setResetSent] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
@@ -37,7 +38,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     }, 1200);
   };
 
-  const handleResetPassword = (e: React.FormEvent) => {
+  const handleResetPassword = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -71,7 +72,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             className="mb-2 h-10 w-auto object-contain transition-all sm:h-12" 
           />
 
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 leading-tight">
+          <h1 className="text-[1.6rem] sm:text-[1.8rem] font-bold tracking-tight text-slate-900 leading-tight">
             Cybence IT Solutions <br /> Scheduler
           </h1>
           <p className="mt-1 text-xs font-medium text-slate-500">

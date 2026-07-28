@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   BadgeCheck,
   Briefcase,
   CalendarDays,
@@ -8,7 +7,6 @@ import {
   Mail,
   MapPin,
   Phone,
-  Settings,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -36,7 +34,7 @@ type ProfilePageProps = {
   onBackToDashboard: () => void;
 };
 
-export default function ProfilePage({ onBackToDashboard }: ProfilePageProps) {
+export default function ProfilePage({}: ProfilePageProps) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-50 p-4 sm:p-6 lg:p-8">
 
@@ -63,7 +61,7 @@ export default function ProfilePage({ onBackToDashboard }: ProfilePageProps) {
 
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+                  <h1 className="text-[1.9rem] sm:text-[2.1rem] font-bold tracking-tight text-slate-900">
                     Maria Dela Cruz
                   </h1>
                   <BadgeCheck className="h-5 w-5 text-[#106fb8]" />
@@ -86,23 +84,9 @@ export default function ProfilePage({ onBackToDashboard }: ProfilePageProps) {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={onBackToDashboard}
-                className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Exit
-              </button>
-
               <button className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 cursor-pointer">
                 <Edit3 className="h-4 w-4" />
                 Edit Profile
-              </button>
-
-              <button className="flex items-center gap-2 rounded-2xl bg-[#106fb8] px-4 py-3 font-semibold text-white shadow-md shadow-[#106fb8]/20 transition-all hover:bg-[#0e5ea4] hover:shadow-lg hover:shadow-[#106fb8]/30 hover:-translate-y-0.5 cursor-pointer">
-                <Settings className="h-4 w-4" />
-                Settings
               </button>
             </div>
           </div>
@@ -117,7 +101,7 @@ export default function ProfilePage({ onBackToDashboard }: ProfilePageProps) {
             <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-bold text-slate-900">
+                  <h2 className="text-lg font-semibold text-slate-900">
                     About Me
                   </h2>
                   <p className="mt-1 text-sm text-slate-500">
@@ -141,7 +125,7 @@ export default function ProfilePage({ onBackToDashboard }: ProfilePageProps) {
 
             {/* Contact Information */}
             <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-lg font-semibold text-slate-900">
                 Contact Information
               </h2>
 
@@ -175,7 +159,7 @@ export default function ProfilePage({ onBackToDashboard }: ProfilePageProps) {
             {/* Stats */}
             <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-slate-900">
+                <h2 className="text-lg font-semibold text-slate-900">
                   Performance Snapshot
                 </h2>
 
@@ -204,7 +188,7 @@ export default function ProfilePage({ onBackToDashboard }: ProfilePageProps) {
             <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
               <div className="flex items-center gap-2">
                 <CalendarDays className="h-5 w-5 text-[#106fb8]" />
-                <h2 className="text-xl font-bold text-slate-900">
+                <h2 className="text-lg font-semibold text-slate-900">
                   Upcoming Schedule
                 </h2>
               </div>

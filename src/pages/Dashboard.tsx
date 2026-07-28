@@ -19,6 +19,7 @@ import {
 import ProfilePage from "./Profile_Page";
 import CalendarPage from "./Calendar";
 import TaskBoard from "./Task_Board";
+import SettingsPage from "./Settings";
 
 const weeklyData = [
   { day: "Mon", value: 4 },
@@ -166,6 +167,8 @@ export default function DashboardPage() {
           <CalendarPage />
         ) : activeTab === "tasks" ? (
           <TaskBoard />
+        ) : activeTab === "settings" ? (
+          <SettingsPage />
         ) : (
           <>
             {/* HEADER BAR */}
@@ -174,7 +177,7 @@ export default function DashboardPage() {
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+                  <h1 className="text-[1.75rem] sm:text-[2rem] font-bold tracking-tight text-slate-900">
                     Good Afternoon, Perpaulo! 👋
                   </h1>
                   <div className="mt-2 flex items-center gap-4 text-xs font-semibold text-slate-500">
@@ -237,7 +240,7 @@ export default function DashboardPage() {
             {/* CHARTS */}
             <div className="grid gap-6 lg:grid-cols-3">
               <section className="lg:col-span-2 rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
-                <h2 className="text-lg font-bold text-slate-900">
+                <h2 className="text-xl font-semibold text-slate-900">
                   Weekly Activity
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -265,7 +268,7 @@ export default function DashboardPage() {
 
               <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)] flex flex-col justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">
+                  <h2 className="text-xl font-semibold text-slate-900">
                     Task Status
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
@@ -299,7 +302,7 @@ export default function DashboardPage() {
             <div className="grid gap-6 lg:grid-cols-3">
               <section className="lg:col-span-2 rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-slate-900">
+                  <h2 className="text-xl font-semibold text-slate-900">
                     Recent Tasks
                   </h2>
                   <button onClick={() => setActiveTab("tasks")} className="flex items-center gap-1 text-xs font-semibold text-[#106fb8] hover:underline cursor-pointer">
