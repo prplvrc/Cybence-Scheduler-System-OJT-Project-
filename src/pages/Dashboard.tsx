@@ -22,6 +22,12 @@ import TaskBoard from "./Task_Board";
 import RequestsPage from "./Requests";
 import SettingsPage from "./Settings";
 
+type DashboardProps = {
+  onLogout: () => void;
+};
+
+export default function Dashboard({ onLogout }: DashboardProps) {
+
 const weeklyData = [
   { day: "Mon", value: 4 },
   { day: "Tue", value: 7 },
@@ -44,7 +50,7 @@ const recentTasks = [
   { id: "3", title: "Task 3", date: "2026-07-07", status: "To Do" },
 ];
 
-export default function DashboardPage() {
+{
   const [activeTab, setActiveTab] = useState("dashboard");
 
   return (
@@ -131,6 +137,11 @@ export default function DashboardPage() {
                 <SidebarItem
                   icon={<LogOut size={18} />}
                   label="Logout"
+                  onClick={() => {
+                    if (window.confirm("Are you sure you want to logout?")) {
+                      onLogout();
+                    }
+                  }}
                 />
               </nav>
             </div>
@@ -432,4 +443,4 @@ function TaskItem({
       </span>
     </div>
   );
-}
+}}

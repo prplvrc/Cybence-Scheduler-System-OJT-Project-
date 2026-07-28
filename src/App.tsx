@@ -7,24 +7,39 @@ import Calendar from "./pages/Calendar";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentPage, setCurrentPage] = useState<"login" | "dashboard" | "profile" | "calendar">("login");
+  const [currentPage, setCurrentPage] = useState<
+    "login" | "dashboard" | "profile" | "calendar"
+  >("login");
 
-  if (!isLoggedIn && currentPage === "login") {
-    return <Login onLoginSuccess={() => {
-      setIsLoggedIn(true);
-      setCurrentPage("dashboard");
-    }} />;
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setCurrentPage("login");
+  };
+
+  if (!isLoggedIn) {
+    return (
+      <Login
+        onLoginSuccess={() => {
+          setIsLoggedIn(true);
+          setCurrentPage("dashboard");
+        }}
+      />
+    );
   }
 
   if (currentPage === "dashboard") {
-    return <Dashboard />;
+    return <Dashboard onLogout={handleLogout} />;
   }
 
   if (currentPage === "calendar") {
     return <Calendar />;
   }
 
-  return <ProfilePage onBackToDashboard={() => setCurrentPage("dashboard")} />;
+  return (
+    <ProfilePage
+      onBackToDashboard={() => setCurrentPage("dashboard")}
+    />
+  );
 }
 
 export default App;
