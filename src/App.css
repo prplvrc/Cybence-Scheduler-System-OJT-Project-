@@ -10,6 +10,7 @@
   background: #ffffff;
   border-right: 1px solid #e5e7eb;
   padding: 22px 18px;
+  border-radius: 16px;
 }
 
 .brand {
@@ -57,7 +58,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 12px;
   font-weight: 600;
   color: #475569;
 }
@@ -164,7 +165,7 @@
 
 .board-card {
   background: #ffffff;
-  border-radius: 18px;
+  border-radius: 16px;
   border: 1px solid #e5e7eb;
   padding: 18px;
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
@@ -202,7 +203,7 @@
   display: grid;
   grid-template-columns: 220px repeat(5, minmax(120px, 1fr));
   border: 1px solid #dbe2ea;
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
 }
 

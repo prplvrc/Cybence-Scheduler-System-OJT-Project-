@@ -169,7 +169,7 @@ export default function DashboardPage() {
         ) : (
           <>
             {/* HEADER BAR */}
-            <section className="relative overflow-hidden rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
+            <section className="relative overflow-hidden rounded-[20px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
               <div className="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-sky-400 to-[#106fb8]" />
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
