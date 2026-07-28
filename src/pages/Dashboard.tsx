@@ -1,3 +1,5 @@
+import logo from "../assets/cybence-logo.png";
+
 const stats = [
   { label: "Scheduled tasks", value: "128", trend: "+12% from last week" },
   { label: "Team utilization", value: "86%", trend: "+4% efficiency" },
@@ -5,7 +7,7 @@ const stats = [
   { label: "Deliveries this week", value: "23", trend: "+3 urgent stays" },
 ];
 
-const columns = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+const columns = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 const schedule = [
   {
@@ -46,111 +48,134 @@ function Dashboard({ onOpenProfile }: DashboardProps) {
     <div className="dashboard-shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-badge">M</div>
-          <span>Monday Flow</span>
+          <img src={logo} alt="Cybence logo" className="brand-logo" />
+          <span>Cybence IT Solutions</span>
         </div>
 
         <div className="nav-section">
           <div className="nav-title">Workspace</div>
           <ul className="nav-list">
-            <li className="nav-item active">📊 Dashboard</li>
-            <li className="nav-item">🗓 Scheduler</li>
-            <li className="nav-item">👥 Team</li>
-            <li className="nav-item">📦 Projects</li>
+            <li className="nav-item active"> Dashboard</li>
+            <li className="nav-item"> Task Board</li>
+            <li className="nav-item"> Calendar</li>
+            <li className="nav-item"> Request</li>
           </ul>
         </div>
 
         <div className="nav-section">
-          <div className="nav-title">Focus</div>
+          <div className="nav-title">Account</div>
           <ul className="nav-list">
-            <li className="nav-item">⚡ High priority</li>
-            <li className="nav-item">🛠 Maintenance</li>
-            <li className="nav-item">📈 Reporting</li>
+            <li className="nav-item"> Settings</li>
+            <li className="nav-item" onClick={onOpenProfile} style={{ cursor: 'pointer' }}> Profile</li>
+            <li className="nav-item"> Logout</li>
           </ul>
+        </div>
+
+        <div style={{ flex: 1 }} />
+
+        <div className="profile-footer" onClick={onOpenProfile} style={{ cursor: 'pointer' }}>
+          <div className="avatar-pill">P</div>
+          <div className="profile-info">
+            <div className="profile-name">Perpaulo Varca</div>
+            <div className="profile-role">Intern</div>
+          </div>
         </div>
       </aside>
 
       <main className="content">
-        <div className="topbar">
+        <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 16 }}>
           <div>
-            <h1>Weekly Scheduler</h1>
+            <h1>Dashboard</h1>
+            <div style={{ color: '#64748b', marginTop: 6 }}>Good Afternoon, Perpaulo!</div>
           </div>
 
-          <div className="topbar-actions">
-            <div className="search-box">Search schedule, team, or task</div>
-            <div className="filter-chip">This week</div>
-            <button className="primary-btn">+ Create board</button>
-            <button className="profile-btn" onClick={onOpenProfile}>Profile</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ textAlign: 'right', color: '#475569', fontSize: 12 }}>
+              <div>July 20, 2026</div>
+              <div style={{ fontWeight: 700 }}>12:00:00 PM</div>
+            </div>
+            <button className="primary-btn">+ NEW TASK</button>
+            <div style={{ width: 36, height: 36, borderRadius: 8, background: '#fff', display: 'grid', placeItems: 'center', border: '1px solid #e5e7eb' }}>🔔</div>
           </div>
         </div>
 
         <section className="stats-grid">
-          {stats.map((stat) => (
-            <article key={stat.label} className="stat-card">
-              <div className="stat-label">{stat.label}</div>
-              <div className="stat-value">{stat.value}</div>
-              <div className="stat-trend">{stat.trend}</div>
-            </article>
-          ))}
+          <article className="stat-card">
+            <div className="stat-label">Total Task</div>
+            <div className="stat-value">1</div>
+            <div className="stat-trend" style={{ color: '#94a3b8', fontWeight: 600 }}>All works</div>
+          </article>
+
+          <article className="stat-card">
+            <div className="stat-label">To do</div>
+            <div className="stat-value">2</div>
+            <div className="stat-trend" style={{ color: '#94a3b8', fontWeight: 600 }}>Not yet started</div>
+          </article>
+
+          <article className="stat-card">
+            <div className="stat-label">Ongoing</div>
+            <div className="stat-value">3</div>
+            <div className="stat-trend" style={{ color: '#94a3b8', fontWeight: 600 }}>Active works</div>
+          </article>
+
+          <article className="stat-card">
+            <div className="stat-label">Completed</div>
+            <div className="stat-value">4</div>
+            <div className="stat-trend" style={{ color: '#94a3b8', fontWeight: 600 }}>Completed works</div>
+          </article>
         </section>
 
-        <section className="board-card">
-          <div className="board-header">
-            <h2>Team schedule board</h2>
-            <div className="board-meta">
-              <span className="tag">3 squads</span>
-              <span className="tag">12 active items</span>
+        <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16 }}>
+          <div>
+            <div className="board-card" style={{ marginBottom: 16 }}>
+              <h3 style={{ margin: 0 }}>Weekly Activity</h3>
+              <div style={{ height: 160, marginTop: 12, background: '#f8fafc', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#cbd5e1' }}>
+                Chart placeholder
+              </div>
+            </div>
+
+            <div className="board-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ margin: 0 }}>Recent Task</h3>
+                <a href="#" style={{ color: '#2563eb', textDecoration: 'none' }}>View Board →</a>
+              </div>
+
+              <ul style={{ marginTop: 12, padding: 0, listStyle: 'none', color: '#475569' }}>
+                <li style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
+                  <div style={{ fontWeight: 700 }}>Task 1</div>
+                  <div style={{ fontSize: 12, color: '#94a3b8' }}>2026-07-06</div>
+                </li>
+                <li style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
+                  <div style={{ fontWeight: 700 }}>Task 2</div>
+                  <div style={{ fontSize: 12, color: '#94a3b8' }}>2026-07-07</div>
+                </li>
+                <li style={{ padding: '10px 0' }}>
+                  <div style={{ fontWeight: 700 }}>Task 3</div>
+                  <div style={{ fontSize: 12, color: '#94a3b8' }}>2026-07-07</div>
+                </li>
+              </ul>
             </div>
           </div>
 
-          <div className="scheduler-grid">
-            <div className="grid-head">Team</div>
-            {columns.map((day) => (
-              <div key={day} className="grid-head">
-                {day}
+          <div>
+            <div className="board-card" style={{ marginBottom: 16 }}>
+              <h3 style={{ margin: 0 }}>Task Status</h3>
+              <div style={{ height: 160, marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 120, height: 120, borderRadius: '50%', background: 'conic-gradient(#10b981 0 50%, #3b82f6 50% 75%, #ef4444 75% 100%)' }} />
               </div>
-            ))}
+            </div>
 
-            {schedule.map((row) => (
-              <>
-                <div key={`${row.team}-label`} className="grid-row-label">
-                  <div className="row-title">{row.team}</div>
-                  <div className="row-subtitle">{row.members}</div>
-                </div>
-                <div className="grid-cell">
-                  <div className="task-card">
-                    <h4>{row.monday.title}</h4>
-                    <small>{row.monday.subtitle}</small>
-                  </div>
-                </div>
-                <div className="grid-cell">
-                  <div className="task-card">
-                    <h4>{row.tuesday.title}</h4>
-                    <small>{row.tuesday.subtitle}</small>
-                  </div>
-                </div>
-                <div className="grid-cell">
-                  <div className="task-card">
-                    <h4>{row.wednesday.title}</h4>
-                    <small>{row.wednesday.subtitle}</small>
-                  </div>
-                </div>
-                <div className="grid-cell">
-                  <div className="task-card">
-                    <h4>{row.thursday.title}</h4>
-                    <small>{row.thursday.subtitle}</small>
-                  </div>
-                </div>
-                <div className="grid-cell">
-                  <div className="task-card">
-                    <h4>{row.friday.title}</h4>
-                    <small>{row.friday.subtitle}</small>
-                  </div>
-                </div>
-              </>
-            ))}
+            <div className="board-card">
+              <h3 style={{ margin: 0 }}>Team Overview</h3>
+              <div style={{ marginTop: 12 }}>
+                <div style={{ padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}><strong>Perpaulo</strong></div>
+                <div style={{ padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>Daniel</div>
+                <div style={{ padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>Mae</div>
+                <div style={{ padding: '8px 0' }}>Janina</div>
+              </div>
+            </div>
           </div>
-        </section>
+        </div>
       </main>
     </div>
   );
