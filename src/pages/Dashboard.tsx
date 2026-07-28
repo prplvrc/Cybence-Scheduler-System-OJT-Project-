@@ -1,184 +1,400 @@
-import logo from "../assets/cybence-logo.png";
+import React from "react";
+import {
+  LayoutDashboard,
+  CheckSquare,
+  Calendar,
+  FileText,
+  Settings,
+  User,
+  LogOut,
+  Bell,
+  Clock,
+  Plus,
+  ArrowRight,
+  TrendingUp,
+  ListTodo,
+  CheckCircle2,
+} from "lucide-react";
 
-const stats = [
-  { label: "Scheduled tasks", value: "128", trend: "+12% from last week" },
-  { label: "Team utilization", value: "86%", trend: "+4% efficiency" },
-  { label: "Pending approvals", value: "14", trend: "6 need review" },
-  { label: "Deliveries this week", value: "23", trend: "+3 urgent stays" },
+const weeklyData = [
+  { day: "Mon", value: 4 },
+  { day: "Tue", value: 7 },
+  { day: "Wed", value: 2 },
+  { day: "Thu", value: 5 },
+  { day: "Fri", value: 5 },
+  { day: "Sat", value: 1 },
 ];
 
-const columns = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-const schedule = [
-  {
-    team: "Design Ops",
-    members: "Mia · Rhea",
-    monday: { title: "Landing page", subtitle: "Review · 09:00" },
-    tuesday: { title: "Prototype", subtitle: "UI sync · 11:00" },
-    wednesday: { title: "Brand update", subtitle: "Asset handoff · 14:00" },
-    thursday: { title: "Motion board", subtitle: "Animation review · 10:30" },
-    friday: { title: "Release prep", subtitle: "Stakeholder signoff · 16:00" },
-  },
-  {
-    team: "Eng Delivery",
-    members: "Jude · Lian",
-    monday: { title: "Sprint planning", subtitle: "Roadmap sync · 08:30" },
-    tuesday: { title: "API QA", subtitle: "Regression test · 13:00" },
-    wednesday: { title: "Release build", subtitle: "Hotfix validation · 12:00" },
-    thursday: { title: "Deploy checklist", subtitle: "Approval gate · 15:30" },
-    friday: { title: "Monitoring", subtitle: "Incident review · 17:00" },
-  },
-  {
-    team: "Support Desk",
-    members: "Noah · Priya",
-    monday: { title: "Queue triage", subtitle: "L1 handoff · 09:30" },
-    tuesday: { title: "Client calls", subtitle: "Priority coverage · 10:00" },
-    wednesday: { title: "Training", subtitle: "New ticket flow · 11:30" },
-    thursday: { title: "Escalations", subtitle: "Ops review · 14:00" },
-    friday: { title: "Wrap-up", subtitle: "Weekly report · 16:30" },
-  },
+const teamMembers = [
+  { name: "Perpaulo", role: "Intern", progress: "80%" },
+  { name: "Daniel", role: "Developer", progress: "65%" },
+  { name: "Mae", role: "Designer", progress: "90%" },
+  { name: "Janina", role: "Manager", progress: "75%" },
 ];
 
-type DashboardProps = {
-  onOpenProfile: () => void;
-};
+const recentTasks = [
+  { id: "1", title: "Task 1", date: "2026-07-07", status: "Completed" },
+  { id: "2", title: "Task 2", date: "2026-07-07", status: "Ongoing" },
+  { id: "3", title: "Task 3", date: "2026-07-07", status: "To do" },
+];
 
-function Dashboard({ onOpenProfile }: DashboardProps) {
+export default function DashboardPage() {
   return (
-    <div className="dashboard-shell">
-      <aside className="sidebar">
-        <div className="brand">
-          <img src={logo} alt="Cybence logo" className="brand-logo" />
-          <span>Cybence IT Solutions</span>
+    /* 1. LOCK CONTAINER HEIGHT & DISABLE OVERFLOW AT PAGE LEVEL */
+    <div className="relative flex h-screen w-screen overflow-hidden bg-slate-50">
+      
+      {/* AMBIENT MESH BACKGROUND */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-[20%] -left-[10%] h-[50vh] w-[70vw] rotate-[-25deg] rounded-[100%] bg-gradient-to-br from-[#106fb8]/35 to-sky-300/20 blur-[130px]" />
+        <div className="absolute -bottom-[20%] -right-[10%] h-[55vh] w-[75vw] rotate-[20deg] rounded-[100%] bg-gradient-to-tl from-sky-400/35 to-[#106fb8]/20 blur-[140px]" />
+        <div className="absolute left-1/2 top-1/2 h-[400px] w-[90vw] max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-200/30 blur-[150px]" />
+      </div>
+
+      {/* 2. FIXED / IMMOVABLE SIDEBAR */}
+      <aside className="relative z-10 h-full w-64 shrink-0 border-r border-white/60 bg-white/70 backdrop-blur-2xl flex flex-col justify-between p-6 shadow-[10px_0_30px_rgba(0,0,0,0.02)]">
+        <div>
+          {/* Logo & Header */}
+          <div className="mb-8 flex items-center gap-3">
+            <img
+              src="assets/cybence-logo.png"
+              alt="Cybence IT Logo"
+              className="h-10 w-10 object-contain rounded-xl"
+            />
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 leading-none">
+                Cybence IT Solutions
+              </h1>
+              <p className="text-xs font-semibold text-[#106fb8] mt-1">
+                Scheduler
+              </p>
+            </div>
+          </div>
+
+          {/* Nav Group 1 */}
+          <div className="space-y-6">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3 px-3">
+                Workspace
+              </p>
+              <nav className="space-y-1.5">
+                <SidebarItem
+                  icon={<LayoutDashboard size={18} />}
+                  label="Dashboard"
+                  active
+                />
+                <SidebarItem
+                  icon={<CheckSquare size={18} />}
+                  label="Tasks"
+                />
+                <SidebarItem
+                  icon={<Calendar size={18} />}
+                  label="Calendar"
+                />
+                <SidebarItem
+                  icon={<FileText size={18} />}
+                  label="Requests"
+                />
+              </nav>
+            </div>
+
+            {/* Nav Group 2 */}
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3 px-3">
+                Account
+              </p>
+              <nav className="space-y-1.5">
+                <SidebarItem
+                  icon={<Settings size={18} />}
+                  label="Settings"
+                />
+                <SidebarItem
+                  icon={<User size={18} />}
+                  label="Profile"
+                />
+                <SidebarItem
+                  icon={<LogOut size={18} />}
+                  label="Logout"
+                />
+              </nav>
+            </div>
+          </div>
         </div>
 
-        <div className="nav-section">
-          <div className="nav-title">Workspace</div>
-          <ul className="nav-list">
-            <li className="nav-item active"> Dashboard</li>
-            <li className="nav-item"> Task Board</li>
-            <li className="nav-item"> Calendar</li>
-            <li className="nav-item"> Request</li>
-          </ul>
-        </div>
-
-        <div className="nav-section">
-          <div className="nav-title">Account</div>
-          <ul className="nav-list">
-            <li className="nav-item"> Settings</li>
-            <li className="nav-item" onClick={onOpenProfile} style={{ cursor: 'pointer' }}> Profile</li>
-            <li className="nav-item"> Logout</li>
-          </ul>
-        </div>
-
-        <div style={{ flex: 1 }} />
-
-        <div className="profile-footer" onClick={onOpenProfile} style={{ cursor: 'pointer' }}>
-          <div className="avatar-pill">P</div>
-          <div className="profile-info">
-            <div className="profile-name">Perpaulo Varca</div>
-            <div className="profile-role">Intern</div>
+        {/* User Card */}
+        <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3.5 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#106fb8]/10 text-sm font-bold text-[#106fb8]">
+            PV
+          </div>
+          <div className="overflow-hidden">
+            <p className="truncate text-sm font-semibold text-slate-800">
+              Perpaulo Varca
+            </p>
+            <p className="truncate text-xs text-slate-500">
+              Intern • Active
+            </p>
           </div>
         </div>
       </aside>
 
-      <main className="content">
-        <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-          <div>
-            <h1>Dashboard</h1>
-            <div style={{ color: '#64748b', marginTop: 6 }}>Good Afternoon, Perpaulo!</div>
-          </div>
+      {/* 3. ONLY THIS MAIN AREA SCROLLS */}
+      <main className="relative z-10 flex-1 h-full overflow-y-auto p-6 lg:p-8 space-y-6">
+        
+        {/* HEADER BAR */}
+        <section className="relative overflow-hidden rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
+          <div className="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-sky-400 to-[#106fb8]" />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ textAlign: 'right', color: '#475569', fontSize: 12 }}>
-              <div>July 20, 2026</div>
-              <div style={{ fontWeight: 700 }}>12:00:00 PM</div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+                Good Afternoon, Perpaulo! 👋
+              </h1>
+              <div className="mt-2 flex items-center gap-4 text-xs font-semibold text-slate-500">
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4 text-[#106fb8]" />
+                  July 20, 2026
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Clock className="h-4 w-4 text-[#106fb8]" />
+                  12:00:00 PM
+                </span>
+              </div>
             </div>
-            <button className="primary-btn">+ NEW TASK</button>
-            <div style={{ width: 36, height: 36, borderRadius: 8, background: '#fff', display: 'grid', placeItems: 'center', border: '1px solid #e5e7eb' }}>🔔</div>
+
+            <div className="flex items-center gap-3">
+              <button className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50 cursor-pointer shadow-sm">
+                <Bell className="h-4 w-4" />
+              </button>
+
+              <button className="flex items-center gap-2 rounded-2xl bg-[#106fb8] px-5 py-3 text-sm font-semibold text-white shadow-md shadow-[#106fb8]/20 transition-all hover:bg-[#0e5ea4] hover:shadow-lg hover:shadow-[#106fb8]/30 hover:-translate-y-0.5 cursor-pointer">
+                <Plus className="h-4 w-4" />
+                <span>New Task</span>
+              </button>
+            </div>
           </div>
-        </div>
-
-        <section className="stats-grid">
-          <article className="stat-card">
-            <div className="stat-label">Total Task</div>
-            <div className="stat-value">1</div>
-            <div className="stat-trend" style={{ color: '#94a3b8', fontWeight: 600 }}>All works</div>
-          </article>
-
-          <article className="stat-card">
-            <div className="stat-label">To do</div>
-            <div className="stat-value">2</div>
-            <div className="stat-trend" style={{ color: '#94a3b8', fontWeight: 600 }}>Not yet started</div>
-          </article>
-
-          <article className="stat-card">
-            <div className="stat-label">Ongoing</div>
-            <div className="stat-value">3</div>
-            <div className="stat-trend" style={{ color: '#94a3b8', fontWeight: 600 }}>Active works</div>
-          </article>
-
-          <article className="stat-card">
-            <div className="stat-label">Completed</div>
-            <div className="stat-value">4</div>
-            <div className="stat-trend" style={{ color: '#94a3b8', fontWeight: 600 }}>Completed works</div>
-          </article>
         </section>
 
-        <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16 }}>
-          <div>
-            <div className="board-card" style={{ marginBottom: 16 }}>
-              <h3 style={{ margin: 0 }}>Weekly Activity</h3>
-              <div style={{ height: 160, marginTop: 12, background: '#f8fafc', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#cbd5e1' }}>
-                Chart placeholder
-              </div>
-            </div>
-
-            <div className="board-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3 style={{ margin: 0 }}>Recent Task</h3>
-                <a href="#" style={{ color: '#2563eb', textDecoration: 'none' }}>View Board →</a>
-              </div>
-
-              <ul style={{ marginTop: 12, padding: 0, listStyle: 'none', color: '#475569' }}>
-                <li style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
-                  <div style={{ fontWeight: 700 }}>Task 1</div>
-                  <div style={{ fontSize: 12, color: '#94a3b8' }}>2026-07-06</div>
-                </li>
-                <li style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
-                  <div style={{ fontWeight: 700 }}>Task 2</div>
-                  <div style={{ fontSize: 12, color: '#94a3b8' }}>2026-07-07</div>
-                </li>
-                <li style={{ padding: '10px 0' }}>
-                  <div style={{ fontWeight: 700 }}>Task 3</div>
-                  <div style={{ fontSize: 12, color: '#94a3b8' }}>2026-07-07</div>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div>
-            <div className="board-card" style={{ marginBottom: 16 }}>
-              <h3 style={{ margin: 0 }}>Task Status</h3>
-              <div style={{ height: 160, marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: 120, height: 120, borderRadius: '50%', background: 'conic-gradient(#10b981 0 50%, #3b82f6 50% 75%, #ef4444 75% 100%)' }} />
-              </div>
-            </div>
-
-            <div className="board-card">
-              <h3 style={{ margin: 0 }}>Team Overview</h3>
-              <div style={{ marginTop: 12 }}>
-                <div style={{ padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}><strong>Perpaulo</strong></div>
-                <div style={{ padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>Daniel</div>
-                <div style={{ padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>Mae</div>
-                <div style={{ padding: '8px 0' }}>Janina</div>
-              </div>
-            </div>
-          </div>
+        {/* STATS GRID */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            value="1"
+            title="Total Tasks"
+            subtitle="All works"
+            icon={<ListTodo className="h-5 w-5 text-[#106fb8]" />}
+            bg="bg-[#106fb8]/10"
+          />
+          <StatCard
+            value="2"
+            title="To do"
+            subtitle="Not yet started"
+            icon={<Clock className="h-5 w-5 text-amber-600" />}
+            bg="bg-amber-50"
+          />
+          <StatCard
+            value="3"
+            title="Ongoing"
+            subtitle="Active works"
+            icon={<TrendingUp className="h-5 w-5 text-sky-600" />}
+            bg="bg-sky-50"
+          />
+          <StatCard
+            value="4"
+            title="Completed"
+            subtitle="Completed works"
+            icon={<CheckCircle2 className="h-5 w-5 text-emerald-600" />}
+            bg="bg-emerald-50"
+          />
         </div>
+
+        {/* MIDDLE SECTION: CHARTS */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* WEEKLY ACTIVITY */}
+          <section className="lg:col-span-2 rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
+            <h2 className="text-lg font-bold text-slate-900">
+              Weekly Activity
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Task completions over the past week
+            </p>
+
+            <div className="flex items-end justify-between gap-3 sm:gap-6 h-60 mt-6 px-4">
+              {weeklyData.map((item) => (
+                <div key={item.day} className="flex flex-col items-center flex-1 h-full justify-end group">
+                  <div className="w-full max-w-[36px] rounded-2xl bg-slate-100 group-hover:bg-sky-100 transition-colors p-1 flex items-end justify-center h-full">
+                    <div
+                      className="w-full rounded-xl bg-gradient-to-t from-[#106fb8] to-sky-400 transition-all duration-500 shadow-sm"
+                      style={{
+                        height: `${(item.value / 8) * 100}%`,
+                      }}
+                    />
+                  </div>
+                  <span className="text-xs font-medium text-slate-500 mt-3">
+                    {item.day}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* TASK STATUS */}
+          <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)] flex flex-col justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">
+                Task Status
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Proportional breakdown
+              </p>
+            </div>
+
+            <div className="relative flex justify-center items-center my-6">
+              <div
+                className="w-40 h-40 rounded-full shadow-inner"
+                style={{
+                  background:
+                    "conic-gradient(#106fb8 0% 50%, #38bdf8 50% 75%, #e2e8f0 75% 100%)",
+                }}
+              />
+              <div className="absolute w-28 h-28 rounded-full bg-white/90 backdrop-blur-md flex flex-col items-center justify-center">
+                <span className="text-2xl font-bold text-slate-900">10</span>
+                <span className="text-[10px] font-semibold text-slate-400 uppercase">Tasks</span>
+              </div>
+            </div>
+
+            <div className="flex justify-around text-xs font-semibold text-slate-600 border-t border-slate-100 pt-3">
+              <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#106fb8]" /> Completed</span>
+              <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-sky-400" /> Ongoing</span>
+              <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-slate-300" /> To Do</span>
+            </div>
+          </section>
+        </div>
+
+        {/* BOTTOM SECTION */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* RECENT TASKS */}
+          <section className="lg:col-span-2 rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-slate-900">
+                Recent Tasks
+              </h2>
+              <button className="flex items-center gap-1 text-xs font-semibold text-[#106fb8] hover:underline cursor-pointer">
+                View Board <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {recentTasks.map((task) => (
+                <TaskItem
+                  key={task.id}
+                  title={task.title}
+                  date={task.date}
+                  status={task.status}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* TEAM OVERVIEW */}
+          <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
+            <h2 className="text-lg font-bold text-slate-900 mb-4">
+              Team Overview
+            </h2>
+
+            <div className="space-y-4">
+              {teamMembers.map((member) => (
+                <div key={member.name} className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-semibold">
+                    <span className="text-slate-800">{member.name} <span className="text-slate-400 font-normal">({member.role})</span></span>
+                    <span className="text-[#106fb8]">{member.progress}</span>
+                  </div>
+                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden p-0.5">
+                    <div
+                      className="h-full bg-[#106fb8] rounded-full transition-all duration-500"
+                      style={{ width: member.progress }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+
       </main>
     </div>
   );
 }
 
-export default Dashboard;
+function SidebarItem({
+  icon,
+  label,
+  active = false,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  active?: boolean;
+}) {
+  return (
+    <button
+      className={`flex items-center gap-3 w-full px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
+        active
+          ? "bg-[#106fb8] text-white shadow-md shadow-[#106fb8]/20"
+          : "text-slate-600 hover:bg-white hover:text-slate-900"
+      }`}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+function StatCard({
+  value,
+  title,
+  subtitle,
+  icon,
+  bg,
+}: {
+  value: string;
+  title: string;
+  subtitle: string;
+  icon: React.ReactNode;
+  bg: string;
+}) {
+  return (
+    <div className="rounded-[28px] border border-white/80 bg-white/85 p-5 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.05)] transition-all hover:-translate-y-1">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          {title}
+        </span>
+        <div className={`p-2.5 rounded-2xl ${bg}`}>
+          {icon}
+        </div>
+      </div>
+      <div className="mt-3">
+        <span className="text-3xl font-bold text-slate-900">{value}</span>
+        <p className="mt-1 text-xs font-medium text-slate-500">{subtitle}</p>
+      </div>
+    </div>
+  );
+}
+
+function TaskItem({
+  title,
+  date,
+  status,
+}: {
+  title: string;
+  date: string;
+  status: string;
+}) {
+  return (
+    <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all hover:border-[#106fb8]/20 hover:bg-white">
+      <div>
+        <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
+        <p className="mt-0.5 text-xs text-slate-400">{date}</p>
+      </div>
+      <span className="rounded-full bg-[#106fb8]/10 px-3 py-1 text-xs font-semibold text-[#106fb8]">
+        {status}
+      </span>
+    </div>
+  );
+}
