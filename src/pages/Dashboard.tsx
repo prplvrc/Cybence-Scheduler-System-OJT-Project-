@@ -110,7 +110,11 @@ const recentTasks = [
       <aside className="relative z-10 h-full w-[260px] shrink-0 border-r border-white/60 bg-white/70 backdrop-blur-2xl flex flex-col justify-between py-6 px-4 shadow-[10px_0_30px_rgba(0,0,0,0.02)]">
         <div>
           {/* Logo & Header */}
-          <div className="mb-8 flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => setActiveTab("dashboard")}
+            className="mb-8 flex w-full items-center gap-2.5 rounded-xl px-2 py-1 text-left transition-colors hover:bg-slate-100/80 cursor-pointer"
+          >
             <img
               src="src/assets/cybence-logo.png"
               alt="Cybence Logo"
@@ -124,7 +128,7 @@ const recentTasks = [
                 Information Technology Solutions
               </p>
             </div>
-          </div>
+          </button>
 
           {/* Navigation */}
           <div className="space-y-6">

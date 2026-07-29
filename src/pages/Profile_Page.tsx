@@ -175,8 +175,12 @@ export default function ProfilePage({}: ProfilePageProps) {
                   </button>
                 </>
               ) : (
-                <button className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:shadow-md cursor-pointer">
-                  <Edit3 size={16} /> {/* Or your icon */}
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:shadow-md cursor-pointer"
+                >
+                  <Edit3 size={16} />
                   Edit Profile
                 </button>
               )}
