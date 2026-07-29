@@ -36,7 +36,7 @@ const initialTaskGroups: TaskGroup[] = [
     tasks: [
       {
         id: 1,
-        task: "TASK 1",
+        task: "SCHEDULER SYSTEM FOR CYBENCE IT SOLUTIONS",
         creator: "Admin",
         createdOn: "2026-07-20",
         status: "Pending",
@@ -44,7 +44,7 @@ const initialTaskGroups: TaskGroup[] = [
       },
       {
         id: 2,
-        task: "TASK 2",
+        task: "ALGORTHIM OPTIMIZATION FOR ABCD COMPANY'S WEBSITE",
         creator: "Admin",
         createdOn: "2026-07-20",
         status: "Pending",
@@ -59,7 +59,7 @@ const initialTaskGroups: TaskGroup[] = [
     tasks: [
       {
         id: 3,
-        task: "TASK 1",
+        task: "DESIGN AND IMPLEMENTATION OF A NEW USER INTERFACE FOR XYZ APPLICATION",
         creator: "Daniel",
         createdOn: "2026-07-20",
         status: "To Do",
@@ -67,7 +67,7 @@ const initialTaskGroups: TaskGroup[] = [
       },
       {
         id: 4,
-        task: "TASK 2",
+        task: "DEVELOPMENT OF A MOBILE APPLICATION FOR E-COMMERCE PLATFORM",
         creator: "Mae",
         createdOn: "2026-07-20",
         status: "To Do",
@@ -82,7 +82,7 @@ const initialTaskGroups: TaskGroup[] = [
     tasks: [
       {
         id: 5,
-        task: "TASK 1",
+        task: "IMPLEMENTATION OF A NEW PAYMENT GATEWAY FOR ABCD COMPANY",
         creator: "Janina",
         createdOn: "2026-07-20",
         status: "Ongoing",
@@ -90,7 +90,7 @@ const initialTaskGroups: TaskGroup[] = [
       },
       {
         id: 6,
-        task: "TASK 2",
+        task: "ALGORTHIM OPTIMIZATION FOR BYD COMPANY'S WEBSITE",
         creator: "Daniel",
         createdOn: "2026-07-20",
         status: "Ongoing",
@@ -105,7 +105,7 @@ const initialTaskGroups: TaskGroup[] = [
     tasks: [
       {
         id: 7,
-        task: "TASK 1",
+        task: "SCHEDULER SYSTEM FOR WWW SOLUTIONS",
         creator: "Admin",
         createdOn: "2026-07-20",
         status: "Completed",
@@ -113,7 +113,7 @@ const initialTaskGroups: TaskGroup[] = [
       },
       {
         id: 8,
-        task: "TASK 2",
+        task: "WEB DEVELOPMENT FOR ABCD COMPANY",
         creator: "Admin",
         createdOn: "2026-07-20",
         status: "Completed",
@@ -128,7 +128,7 @@ const initialTaskGroups: TaskGroup[] = [
     tasks: [
       {
         id: 9,
-        task: "TASK 1",
+        task: "SOFTWARE TESTING FOR XYZ APPLICATION",
         creator: "Admin",
         createdOn: "2026-07-20",
         status: "Unfinished",
@@ -136,7 +136,7 @@ const initialTaskGroups: TaskGroup[] = [
       },
       {
         id: 10,
-        task: "TASK 2",
+        task: "HARDWARE INTEGRATION FOR ABCD COMPANY'S SYSTEM",
         creator: "Admin",
         createdOn: "2026-07-20",
         status: "Unfinished",
