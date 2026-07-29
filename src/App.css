@@ -83,6 +83,26 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Fixes the top horizontal gradient line cleanly anchored to the header container */
+.topbar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #6048ff, #7c87ff);
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
 }
 
 .topbar h1 {
