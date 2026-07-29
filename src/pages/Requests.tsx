@@ -195,7 +195,7 @@ export default function RequestPage() {
               <div className="flex justify-end pt-6">
                 <button
                   type="submit"
-                  className="rounded-xl bg-[#106fb8] px-8 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0c5e9f]"
+                  className="flex items-center gap-2 rounded-2xl bg-[#106fb8] px-5 py-3 text-sm font-semibold text-white shadow-md shadow-[#106fb8]/20 transition-all hover:bg-[#0e5ea4] hover:shadow-lg hover:shadow-[#106fb8]/30 hover:-translate-y-0.5 cursor-pointer"
                 >
                   Submit Request
                 </button>
