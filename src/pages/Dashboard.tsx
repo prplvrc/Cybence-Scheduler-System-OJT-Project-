@@ -99,7 +99,7 @@ const recentTasks = [
               className="h-10 w-10 object-contain rounded-xl shrink-0"
             />
             <div className="min-w-0 flex-1 overflow-hidden">
-              <h1 className="text-xl font-bold tracking-[0.1em] text-[#106fb8] leading-none truncate">
+              <h1 className="text-xl font-bold tracking-[0.42em] text-[#106fb8] leading-none truncate">
                 CYBENCE
               </h1>
               <p className="text-[10px] text-slate-500 truncate mt-1">
