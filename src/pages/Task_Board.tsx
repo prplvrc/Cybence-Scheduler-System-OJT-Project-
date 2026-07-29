@@ -8,6 +8,8 @@ import {
   Eye,
   Search,
 } from "lucide-react";
+import NewTaskModal from "./New_Task";
+import NotificationPanel from "./Notification"; // Make sure path matches your Notification file location
 import "./Task_Board.css";
 
 interface Task {
@@ -26,7 +28,7 @@ interface TaskGroup {
   tasks: Task[];
 }
 
-const taskGroups: TaskGroup[] = [
+const initialTaskGroups: TaskGroup[] = [
   {
     title: "To Be Assigned",
     dotClass: "dot-pending",
@@ -146,28 +148,64 @@ const taskGroups: TaskGroup[] = [
 
 export default function TaskBoard() {
   const [search, setSearch] = useState("");
+  const [taskGroups, setTaskGroups] = useState<TaskGroup[]>(initialTaskGroups);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   const [currentTime, setCurrentTime] = useState(new Date());
 
-useEffect(() => {
-  const timer = setInterval(() => {
-    setCurrentTime(new Date());
-  }, 1000);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
 
-  return () => clearInterval(timer);
-}, []);
+    return () => clearInterval(timer);
+  }, []);
 
-const formattedDate = currentTime.toLocaleDateString("en-US", {
-  month: "long",
-  day: "numeric",
-  year: "numeric",
-});
+  const formattedDate = currentTime.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 
-const formattedTime = currentTime.toLocaleTimeString("en-US", {
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-});
+  const formattedTime = currentTime.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+  // Handle task creation submission from the modal
+  const handleCreateTask = (taskData: any) => {
+    const newTask: Task = {
+      id: Date.now(),
+      task: taskData.title,
+      creator: taskData.assignTo,
+      createdOn: new Date().toISOString().split("T")[0],
+      status: taskData.status,
+      dueDate: taskData.dueDate || new Date().toISOString().split("T")[0],
+    };
+
+    setTaskGroups((prevGroups) =>
+      prevGroups.map((group) => {
+        const matchesGroup =
+          (group.title === "To Do" && taskData.status === "To Do") ||
+          (group.title === "Ongoing" && taskData.status === "Ongoing") ||
+          (group.title === "Completed" && taskData.status === "Completed") ||
+          (group.title === "Unfinished" && taskData.status === "Unfinished") ||
+          (group.title === "To Be Assigned" && taskData.status === "Backlog");
+
+        if (matchesGroup) {
+          return {
+            ...group,
+            tasks: [newTask, ...group.tasks],
+          };
+        }
+        return group;
+      })
+    );
+
+    setIsModalOpen(false);
+  };
 
   return (
     <div className="task-board-view">
@@ -187,11 +225,32 @@ const formattedTime = currentTime.toLocaleTimeString("en-US", {
             <span className="time-str">{formattedTime}</span>
           </div>
 
-          <button className="icon-btn" aria-label="Notifications">
-            <Bell size={18} />
-          </button>
+          {/* Notification Button & Dropdown Container */}
+          <div className="relative">
+            <button 
+              className="icon-btn" 
+              aria-label="Notifications"
+              onClick={() => setIsNotificationOpen((prev) => !prev)}
+            >
+              <Bell size={18} />
+            </button>
 
-          <button className="btn-primary">+ New Task</button>
+            {isNotificationOpen && (
+              <div className="absolute right-0 top-[calc(100%+8px)] z-50">
+                <NotificationPanel
+                  isOpen={isNotificationOpen}
+                  onClose={() => setIsNotificationOpen(false)}
+                />
+              </div>
+            )}
+          </div>
+
+          <button 
+            className="btn-primary" 
+            onClick={() => setIsModalOpen(true)}
+          >
+            + New Task
+          </button>
         </div>
       </header>
 
@@ -222,6 +281,13 @@ const formattedTime = currentTime.toLocaleTimeString("en-US", {
           />
         ))}
       </div>
+
+      {/* New Task Modal Popup */}
+      <NewTaskModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleCreateTask}
+      />
     </div>
   );
 }

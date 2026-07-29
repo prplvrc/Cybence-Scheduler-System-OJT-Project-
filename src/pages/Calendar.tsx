@@ -1,5 +1,6 @@
 ﻿import { useState } from "react";
 import "./Calendar.css";
+import NewTaskModal from "./New_Task";
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -8,6 +9,7 @@ export default function Calendar() {
   const [selectedDay, setSelectedDay] = useState(
     new Date().getDate()
   );
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
@@ -59,6 +61,11 @@ export default function Calendar() {
     setSelectedDay(now.getDate());
   };
 
+  const handleCreateTask = (taskData: any) => {
+    console.log("New task created from calendar:", taskData);
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="calendar-view">
       {/* HEADER */}
@@ -87,7 +94,10 @@ export default function Calendar() {
             </span>
           </div>
 
-          <button className="btn-primary">
+          <button 
+            className="btn-primary"
+            onClick={() => setIsModalOpen(true)}
+          >
             + New Task
           </button>
         </div>
@@ -244,6 +254,13 @@ export default function Calendar() {
           </div>
         </aside>
       </div>
+
+      {/* New Task Modal Popup */}
+      <NewTaskModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleCreateTask}
+      />
     </div>
   );
 }

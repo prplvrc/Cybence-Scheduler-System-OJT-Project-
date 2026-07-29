@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { X, Calendar } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { X, ChevronDown, Calendar, Check } from "lucide-react";
 
 interface NewTaskFormData {
   title: string;
@@ -33,12 +33,32 @@ export default function NewTaskModal({ isOpen, onClose, onSubmit }: NewTaskModal
     tag: "Design",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const toggleDropdown = (name: string) => {
+    setOpenDropdown(openDropdown === name ? null : name);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleInputChange = (name: keyof NewTaskFormData, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+    setOpenDropdown(null);
   };
 
   const handleSubmit = () => {
@@ -60,75 +80,115 @@ export default function NewTaskModal({ isOpen, onClose, onSubmit }: NewTaskModal
 
   if (!isOpen) return null;
 
+  const renderCustomSelect = (label: string, name: keyof NewTaskFormData, options: string[]) => {
+    const isOpenMenu = openDropdown === name;
+
+    return (
+      <div className="group relative">
+        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 transition-colors group-focus-within:text-[#106fb8]">
+          {label}
+        </label>
+        
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => toggleDropdown(name)}
+            className={`w-full rounded-xl border bg-slate-50/50 px-3.5 py-2.5 pr-9 text-left text-xs text-slate-800 transition flex items-center justify-between cursor-pointer ${
+              isOpenMenu 
+                ? "border-[#106fb8] bg-white ring-2 ring-[#106fb8]/10" 
+                : "border-slate-200 hover:border-slate-300"
+            }`}
+          >
+            <span className="truncate">{formData[name]}</span>
+            <ChevronDown className={`absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 transition-transform duration-200 pointer-events-none ${isOpenMenu ? "rotate-180 text-[#106fb8]" : ""}`} />
+          </button>
+
+          {isOpenMenu && (
+            <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 overflow-hidden rounded-xl border border-slate-100 bg-white/95 p-1 shadow-lg backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150">
+              <div className="max-h-36 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-200 space-y-0.5">
+                {options.map((opt) => {
+                  const isSelected = formData[name] === opt;
+                  return (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => handleInputChange(name, opt)}
+                      className={`w-full flex items-center justify-between rounded-lg px-3 py-2 text-xs transition text-left cursor-pointer ${
+                        isSelected 
+                          ? "bg-[#106fb8]/10 font-semibold text-[#106fb8]" 
+                          : "text-slate-700 hover:bg-slate-100/80 hover:text-slate-900"
+                      }`}
+                    >
+                      <span className="truncate">{opt}</span>
+                      {isSelected && <Check className="h-3.5 w-3.5 text-[#106fb8] shrink-0 ml-2" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl overflow-hidden rounded-[32px] border border-slate-700/50 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+      <div 
+        ref={containerRef}
+        className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] rounded-[24px] border border-white/80 bg-white/95 p-6 backdrop-blur-2xl shadow-xl"
+      >
+        
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">New Task</h1>
+        <div className="mb-4 flex items-center justify-between">
+          <h1 className="text-xl font-bold text-slate-900">New Task</h1>
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-slate-400 transition hover:bg-slate-700/50 hover:text-white"
+            className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
             aria-label="Close modal"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Form */}
-        <div className="space-y-5">
+        {/* Form Fields */}
+        <div className="space-y-3.5">
           {/* Task Title */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wide text-slate-400 mb-2">
+          <div className="group">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 transition-colors group-focus-within:text-[#106fb8]">
               Task Title
             </label>
             <input
               type="text"
               name="title"
               value={formData.title}
-              onChange={handleInputChange}
+              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               placeholder="Enter task title"
-              className="w-full rounded-2xl border border-slate-600/50 bg-slate-700/30 px-4 py-3 text-white placeholder-slate-500 transition focus:border-[#106fb8]/70 focus:bg-slate-700/50 focus:outline-none focus:ring-1 focus:ring-[#106fb8]/30"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 placeholder-slate-400 transition focus:border-[#106fb8] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#106fb8]/10"
             />
           </div>
 
           {/* Description */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wide text-slate-400 mb-2">
+          <div className="group">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 transition-colors group-focus-within:text-[#106fb8]">
               Description
             </label>
             <textarea
               name="description"
               value={formData.description}
-              onChange={handleInputChange}
+              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               placeholder="Describe the task in detail"
-              rows={4}
-              className="w-full rounded-2xl border border-slate-600/50 bg-slate-700/30 px-4 py-3 text-white placeholder-slate-500 transition focus:border-[#106fb8]/70 focus:bg-slate-700/50 focus:outline-none focus:ring-1 focus:ring-[#106fb8]/30 resize-none"
+              rows={2}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 transition focus:border-[#106fb8] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#106fb8]/10 resize-none"
             />
           </div>
 
           {/* Row 1: Assign To & Due Date */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wide text-slate-400 mb-2">
-                Assign To
-              </label>
-              <select
-                name="assignTo"
-                value={formData.assignTo}
-                onChange={handleInputChange}
-                className="w-full rounded-2xl border border-slate-600/50 bg-slate-700/30 px-4 py-3 text-white transition focus:border-[#106fb8]/70 focus:bg-slate-700/50 focus:outline-none focus:ring-1 focus:ring-[#106fb8]/30 appearance-none cursor-pointer"
-              >
-                {teamMembers.map((member) => (
-                  <option key={member} value={member}>
-                    {member}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {renderCustomSelect("Assign To", "assignTo", teamMembers)}
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wide text-slate-400 mb-2">
+            <div className="group">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 transition-colors group-focus-within:text-[#106fb8]">
                 Due Date
               </label>
               <div className="relative">
@@ -136,88 +196,40 @@ export default function NewTaskModal({ isOpen, onClose, onSubmit }: NewTaskModal
                   type="date"
                   name="dueDate"
                   value={formData.dueDate}
-                  onChange={handleInputChange}
-                  className="w-full rounded-2xl border border-slate-600/50 bg-slate-700/30 px-4 py-3 pr-10 text-white transition focus:border-[#106fb8]/70 focus:bg-slate-700/50 focus:outline-none focus:ring-1 focus:ring-[#106fb8]/30"
+                  onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 pr-9 text-xs text-slate-800 transition focus:border-[#106fb8] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#106fb8]/10 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                 />
-                <Calendar className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                <Calendar className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 pointer-events-none" />
               </div>
             </div>
           </div>
 
           {/* Row 2: Status & Priority */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wide text-slate-400 mb-2">
-                Status
-              </label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                className="w-full rounded-2xl border border-slate-600/50 bg-slate-700/30 px-4 py-3 text-white transition focus:border-[#106fb8]/70 focus:bg-slate-700/50 focus:outline-none focus:ring-1 focus:ring-[#106fb8]/30 appearance-none cursor-pointer"
-              >
-                {statusOptions.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wide text-slate-400 mb-2">
-                Priority
-              </label>
-              <select
-                name="priority"
-                value={formData.priority}
-                onChange={handleInputChange}
-                className="w-full rounded-2xl border border-slate-600/50 bg-slate-700/30 px-4 py-3 text-white transition focus:border-[#106fb8]/70 focus:bg-slate-700/50 focus:outline-none focus:ring-1 focus:ring-[#106fb8]/30 appearance-none cursor-pointer"
-              >
-                {priorityOptions.map((priority) => (
-                  <option key={priority} value={priority}>
-                    {priority}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {renderCustomSelect("Status", "status", statusOptions)}
+            {renderCustomSelect("Priority", "priority", priorityOptions)}
           </div>
 
           {/* Tag */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wide text-slate-400 mb-2">
-              Tag
-            </label>
-            <select
-              name="tag"
-              value={formData.tag}
-              onChange={handleInputChange}
-              className="w-full rounded-2xl border border-slate-600/50 bg-slate-700/30 px-4 py-3 text-white transition focus:border-[#106fb8]/70 focus:bg-slate-700/50 focus:outline-none focus:ring-1 focus:ring-[#106fb8]/30 appearance-none cursor-pointer"
-            >
-              {tagOptions.map((tag) => (
-                <option key={tag} value={tag}>
-                  {tag}
-                </option>
-              ))}
-            </select>
-          </div>
+          {renderCustomSelect("Tag", "tag", tagOptions)}
         </div>
 
-        {/* Buttons */}
-        <div className="mt-8 flex gap-3">
+        {/* Action Buttons */}
+        <div className="mt-6 flex gap-2.5">
           <button
             onClick={onClose}
-            className="flex-1 rounded-2xl border border-slate-600/50 px-6 py-3 font-semibold text-slate-300 transition hover:border-slate-500 hover:bg-slate-700/50 hover:text-white"
+            className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:border-slate-300 cursor-pointer shadow-sm"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="flex-1 rounded-2xl bg-gradient-to-r from-[#106fb8] to-sky-500 px-6 py-3 font-semibold text-white shadow-lg shadow-[#106fb8]/30 transition hover:from-[#0e5ea4] hover:to-sky-400 hover:shadow-[#106fb8]/40"
+            className="flex-1 rounded-xl bg-[#106fb8] px-4 py-2.5 text-xs font-semibold text-white shadow-md shadow-[#106fb8]/20 transition hover:bg-[#0e5ea4] hover:shadow-lg hover:shadow-[#106fb8]/30 cursor-pointer"
           >
             Create Task
           </button>
         </div>
+
       </div>
     </div>
   );
