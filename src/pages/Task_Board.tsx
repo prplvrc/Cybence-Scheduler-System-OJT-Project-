@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Bell,
   Calendar,
@@ -147,6 +147,28 @@ const taskGroups: TaskGroup[] = [
 export default function TaskBoard() {
   const [search, setSearch] = useState("");
 
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+useEffect(() => {
+  const timer = setInterval(() => {
+    setCurrentTime(new Date());
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, []);
+
+const formattedDate = currentTime.toLocaleDateString("en-US", {
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+});
+
+const formattedTime = currentTime.toLocaleTimeString("en-US", {
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+});
+
   return (
     <div className="task-board-view">
       {/* Header Section */}
@@ -159,10 +181,10 @@ export default function TaskBoard() {
         <div className="header-right">
           <div className="timestamp-badge">
             <Calendar size={15} />
-            <span className="date-str">July 20, 2026</span>
+            <span className="date-str">{formattedDate}</span>
             <span className="dot">•</span>
             <Clock size={15} />
-            <span className="time-str">12:00:00 PM</span>
+            <span className="time-str">{formattedTime}</span>
           </div>
 
           <button className="icon-btn" aria-label="Notifications">

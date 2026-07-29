@@ -31,12 +31,12 @@ const schedule = [
 ];
 
 type ProfilePageProps = {
-  onBackToDashboard: () => void;
+  onBackToDashboard?: () => void;
 };
 
 export default function ProfilePage({}: ProfilePageProps) {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <div className="relative min-h-screen overflow-x-hidden bg-slate-50 p-4 sm:p-6 lg:p-8">
 
       {/* Ambient Mesh Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -45,7 +45,7 @@ export default function ProfilePage({}: ProfilePageProps) {
         <div className="absolute left-1/2 top-1/2 h-[400px] w-[90vw] max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-200/30 blur-[150px]" />
       </div>
 
-      <div className="relative mx-auto max-w-6xl space-y-6">
+      <div className="relative mx-auto max-w-6xl space-y-6 pb-1">
 
         {/* Profile Header */}
         <section className="relative overflow-hidden rounded-[32px] border border-white/80 bg-white/85 p-8 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
@@ -84,7 +84,7 @@ export default function ProfilePage({}: ProfilePageProps) {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <button className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 cursor-pointer">
+              <button className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 cursor-pointer shadow-sm">
                 <Edit3 className="h-4 w-4" />
                 Edit Profile
               </button>
@@ -92,10 +92,11 @@ export default function ProfilePage({}: ProfilePageProps) {
           </div>
         </section>
 
-        <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
+        {/* Balanced Grid Container */}
+        <div className="grid gap-6 lg:grid-cols-2 items-start">
 
           {/* Left Column */}
-          <div className="space-y-6">
+          <div className="space-y-6 flex flex-col">
 
             {/* About */}
             <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
@@ -143,7 +144,7 @@ export default function ProfilePage({}: ProfilePageProps) {
                         {item.label}
                       </div>
 
-                      <p className="mt-2 text-sm text-slate-600">
+                      <p className="mt-2 text-sm text-slate-600 truncate">
                         {item.value}
                       </p>
                     </div>
@@ -154,7 +155,7 @@ export default function ProfilePage({}: ProfilePageProps) {
           </div>
 
           {/* Right Column */}
-          <div className="space-y-6">
+          <div className="space-y-6 flex flex-col">
 
             {/* Stats */}
             <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">

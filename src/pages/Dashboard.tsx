@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   CheckSquare,
@@ -50,9 +49,35 @@ const recentTasks = [
   { id: "3", title: "Task 3", date: "2026-07-07", status: "To Do" },
 ];
 
-{
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [currentTime, setCurrentTime] = useState(new Date());
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const greeting =
+    currentTime.getHours() < 12
+      ? "Good Morning"
+      : currentTime.getHours() < 18
+      ? "Good Afternoon"
+      : "Good Evening";
+
+  const formattedDate = currentTime.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  const formattedTime = currentTime.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
   return (
     <div className="relative flex h-screen w-screen overflow-hidden bg-slate-50">
       
@@ -64,20 +89,20 @@ const recentTasks = [
       </div>
 
       {/* FIXED SIDEBAR */}
-      <aside className="relative z-10 h-full w-74 shrink-0 border-r border-white/60 bg-white/70 backdrop-blur-2xl flex flex-col justify-between p-6 shadow-[10px_0_30px_rgba(0,0,0,0.02)]">
+      <aside className="relative z-10 h-full w-[260px] shrink-0 border-r border-white/60 bg-white/70 backdrop-blur-2xl flex flex-col justify-between py-6 px-4 shadow-[10px_0_30px_rgba(0,0,0,0.02)]">
         <div>
           {/* Logo & Header */}
-          <div className="mb-8 flex items-center gap-3">
+          <div className="mb-8 flex items-center gap-2.5">
             <img
               src="src/assets/cybence-logo.png"
               alt="Cybence Logo"
-              className="h-14 w-14 object-contain rounded-xl"
+              className="h-10 w-10 object-contain rounded-xl shrink-0"
             />
-            <div>
-              <h1 className="text-3xl font-bold tracking-[.17em] text-[#106fb8] leading-none">
+            <div className="min-w-0 flex-1 overflow-hidden">
+              <h1 className="text-xl font-bold tracking-[0.1em] text-[#106fb8] leading-none truncate">
                 CYBENCE
               </h1>
-              <p className="text-xs text-[12px]">
+              <p className="text-[10px] text-slate-500 truncate mt-1">
                 Information Technology Solutions
               </p>
             </div>
@@ -153,7 +178,7 @@ const recentTasks = [
           onClick={() => setActiveTab("profile")}
           className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3.5 flex items-center gap-3 cursor-pointer hover:bg-slate-100/80 transition-colors"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#106fb8]/10 text-sm font-bold text-[#106fb8]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#106fb8]/10 text-sm font-bold text-[#106fb8] shrink-0">
             PV
           </div>
           <div className="overflow-hidden">
@@ -192,16 +217,16 @@ const recentTasks = [
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h1 className="text-[1.75rem] sm:text-[2rem] font-bold tracking-tight text-slate-900">
-                    Good Afternoon, Perpaulo! 👋
+                    {greeting}, Perpaulo! 👋
                   </h1>
                   <div className="mt-2 flex items-center gap-4 text-xs font-semibold text-slate-500">
                     <span className="flex items-center gap-1.5">
                       <CalendarIcon className="h-4 w-4 text-[#106fb8]" />
-                      July 20, 2026
+                      {formattedDate}
                     </span>
                     <span className="flex items-center gap-1.5">
                       <Clock className="h-4 w-4 text-[#106fb8]" />
-                      12:00:00 PM
+                      {formattedTime}
                     </span>
                   </div>
                 </div>
@@ -443,4 +468,4 @@ function TaskItem({
       </span>
     </div>
   );
-}}
+}
