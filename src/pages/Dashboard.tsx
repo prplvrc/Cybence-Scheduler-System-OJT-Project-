@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   LayoutDashboard,
   CheckSquare,
@@ -20,6 +20,8 @@ import CalendarPage from "./Calendar";
 import TaskBoard from "./Task_Board";
 import RequestsPage from "./Requests";
 import SettingsPage from "./Settings";
+import NotificationPanel from "./Notification";
+import NewTaskModal from "./New_Task";
 
 type DashboardProps = {
   onLogout: () => void;
@@ -51,6 +53,9 @@ const recentTasks = [
 
   const [activeTab, setActiveTab] = useState("dashboard");
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -59,6 +64,19 @@ const recentTasks = [
 
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setIsNotificationOpen(false);
+      }
+    };
+
+    if (isNotificationOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [isNotificationOpen]);
 
   const greeting =
     currentTime.getHours() < 12
@@ -211,7 +229,7 @@ const recentTasks = [
         ) : (
           <>
             {/* HEADER BAR */}
-            <section className="relative overflow-hidden rounded-[20px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
+            <section className="relative overflow-visible rounded-[20px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
               <div className="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-sky-400 to-[#106fb8]" />
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -232,11 +250,15 @@ const recentTasks = [
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <button className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50 cursor-pointer shadow-sm">
+                  <button
+                    onClick={() => setIsNotificationOpen((prev) => !prev)}
+                    className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50 cursor-pointer shadow-sm"
+                    aria-label="Open notifications"
+                  >
                     <Bell className="h-4 w-4" />
                   </button>
 
-                  <button onClick={() => setActiveTab("tasks")} className="flex items-center gap-2 rounded-2xl bg-[#106fb8] px-5 py-3 text-sm font-semibold text-white shadow-md shadow-[#106fb8]/20 transition-all hover:bg-[#0e5ea4] hover:shadow-lg hover:shadow-[#106fb8]/30 hover:-translate-y-0.5 cursor-pointer">
+                  <button onClick={() => setIsNewTaskOpen(true)} className="flex items-center gap-2 rounded-2xl bg-[#106fb8] px-5 py-3 text-sm font-semibold text-white shadow-md shadow-[#106fb8]/20 transition-all hover:bg-[#0e5ea4] hover:shadow-lg hover:shadow-[#106fb8]/30 hover:-translate-y-0.5 cursor-pointer">
                     <Plus className="h-4 w-4" />
                     <span>New Task</span>
                   </button>
@@ -387,6 +409,23 @@ const recentTasks = [
           </>
         )}
       </main>
+
+      {/* NOTIFICATION PANEL - ROOT LEVEL */}
+      {isNotificationOpen && (
+        <div ref={notificationRef} className="absolute right-8 top-28 z-50">
+          <NotificationPanel isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} />
+        </div>
+      )}
+
+      {/* NEW TASK MODAL */}
+      <NewTaskModal
+        isOpen={isNewTaskOpen}
+        onClose={() => setIsNewTaskOpen(false)}
+        onSubmit={(taskData) => {
+          console.log("New task created:", taskData);
+          setIsNewTaskOpen(false);
+        }}
+      />
     </div>
   );
 }
