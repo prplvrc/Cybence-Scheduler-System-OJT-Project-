@@ -1,75 +1,148 @@
-# React + TypeScript + Vite
+# CYBENCE Scheduler System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern web-based Scheduler System developed for CYBENCE Information Technology Solutions during the On-the-Job Training (OJT) program.
 
-Currently, two official plugins are available:
+The system is designed to help teams organize schedules, manage tasks, monitor deadlines, track requests, and improve overall workflow efficiency through a centralized platform.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- User Authentication
+- Dashboard Overview
+- Task Management Board
+- Interactive Calendar
+- Schedule Monitoring
+- Request Management
+- User Profile Management
+- Account Settings
+- Real-Time Date and Time Display
+- Responsive User Interface
+- Modern Glassmorphism Design
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Technologies Used
 
-## Expanding the ESLint configuration
+### Frontend
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Lucide React
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Development Tools
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Visual Studio Code
+- Git
+- GitHub
+- npm
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Project Structure
 
+```text
+src/
+│
+├── assets/
+│
+├── pages/
+│   ├── Login.tsx
+│   ├── Dashboard.tsx
+│   ├── Calendar.tsx
+│   ├── Task_Board.tsx
+│   ├── Requests.tsx
+│   ├── Profile_Page.tsx
+│   └── Settings.tsx
+│
+├── App.tsx
+├── main.tsx
+└── index.css
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Installation
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Clone the repository:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+git clone <repository-url>
 ```
+
+Navigate to the project directory:
+
+```bash
+cd scheduler-system
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:5173
+```
+
+## System Modules
+
+### Dashboard
+
+Provides an overview of schedules, tasks, recent activities, statistics, and team progress.
+
+### Calendar
+
+Displays schedules, deadlines, meetings, and upcoming events in an interactive calendar interface.
+
+### Task Board
+
+Organizes tasks according to their status:
+
+- To Be Assigned
+- To Do
+- Ongoing
+- Completed
+- Unfinished
+
+### Requests
+
+Allows users to submit, track, and manage requests within the system.
+
+### Profile
+
+Displays and manages user account information.
+
+### Settings
+
+Provides options for configuring system preferences and account settings.
+
+## Objectives
+
+The CYBENCE Scheduler System aims to:
+
+- Improve task organization
+- Centralize schedule management
+- Monitor deadlines efficiently
+- Enhance team collaboration
+- Increase productivity and workflow visibility
+
+## Developers
+
+Developed by:
+
+- Maria Teresa Mae B. De Jesus
+- Janina Mai Ericka A. Lloret
+- Daniel S. Sardalla
+- Perpaulo B. Varca
+
+For:
+
+**CYBENCE Information Technology Solutions**
+
+## License
+
+This project was developed for educational, internship, and organizational purposes.
