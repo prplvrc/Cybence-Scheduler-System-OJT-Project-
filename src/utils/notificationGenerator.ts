@@ -150,15 +150,6 @@ const daysUntil = (dateString: string): number => {
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 };
 
-// Function to format relative time
-const formatRelativeTime = (dateString: string): string => {
-  const days = daysUntil(dateString);
-  if (days < 0) return "Overdue";
-  if (days === 0) return "Due today";
-  if (days === 1) return "Due tomorrow";
-  return `Due in ${days} days`;
-};
-
 // Generate notifications from tasks and events
 export const generateNotifications = (): NotificationItem[] => {
   const notifications: NotificationItem[] = [];

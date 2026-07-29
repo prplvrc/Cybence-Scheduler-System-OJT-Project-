@@ -1,3 +1,4 @@
+import { useEffect, useState, type ChangeEvent } from "react";
 import {
   BadgeCheck,
   Briefcase,
@@ -11,12 +12,26 @@ import {
   Sparkles,
 } from "lucide-react";
 
-const profileDetails = [
-  { label: "Email", value: "maria.dela.cruz@cybence.com", icon: Mail },
-  { label: "Phone", value: "+63 912 345 6789", icon: Phone },
-  { label: "Location", value: "Quezon City, Philippines", icon: MapPin },
-  { label: "Department", value: "Operations & Scheduling", icon: Briefcase },
-];
+type ProfileFormState = {
+  name: string;
+  title: string;
+  about: string;
+  email: string;
+  phone: string;
+  location: string;
+  department: string;
+};
+
+const initialProfile: ProfileFormState = {
+  name: "Maria Dela Cruz",
+  title: "Scheduler • Team Lead • Cybence Operations",
+  about:
+    "Maria is responsible for organizing schedules, ensuring smooth coordination across teams, and maintaining reliable communication with clients. She enjoys creating order out of busy workflows and helping others stay on track.",
+  email: "maria.dela.cruz@cybence.com",
+  phone: "+63 912 345 6789",
+  location: "Quezon City, Philippines",
+  department: "Operations & Scheduling",
+};
 
 const stats = [
   { label: "Assignments", value: "12" },
@@ -35,9 +50,52 @@ type ProfilePageProps = {
 };
 
 export default function ProfilePage({}: ProfilePageProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [profileData, setProfileData] = useState<ProfileFormState>(initialProfile);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (profileImage?.startsWith("blob:")) {
+        URL.revokeObjectURL(profileImage);
+      }
+    };
+  }, [profileImage]);
+
+  const initials = profileData.name
+    .split(" ")
+    .map((word) => word[0] || "")
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  const handleFieldChange = (field: keyof ProfileFormState, value: string) => {
+    setProfileData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setProfileImage(previewUrl);
+  };
+
+  const handleSave = () => {
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setProfileData(initialProfile);
+    setProfileImage(null);
+    setIsEditing(false);
+  };
+
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-slate-50 p-4 sm:p-6 lg:p-8">
-
       {/* Ambient Mesh Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[20%] -left-[10%] h-[50vh] w-[70vw] rotate-[-25deg] rounded-[100%] bg-gradient-to-br from-[#106fb8]/35 to-sky-300/20 blur-[130px]" />
@@ -46,30 +104,45 @@ export default function ProfilePage({}: ProfilePageProps) {
       </div>
 
       <div className="relative mx-auto max-w-6xl space-y-6 pb-1">
-
         {/* Profile Header */}
         <section className="relative overflow-hidden rounded-[32px] border border-white/80 bg-white/85 p-8 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
-
           <div className="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-sky-400 to-[#106fb8]" />
 
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-              <div className="flex h-24 w-24 items-center justify-center rounded-full border border-[#106fb8]/10 bg-[#106fb8]/10 text-3xl font-bold text-[#106fb8]">
-                MD
+              <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-[#106fb8]/10 bg-[#106fb8]/10 text-3xl font-bold text-[#106fb8]">
+                {profileImage ? (
+                  <img src={profileImage} alt="Profile preview" className="h-full w-full object-cover" />
+                ) : (
+                  initials
+                )}
               </div>
 
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-[1.9rem] sm:text-[2.1rem] font-bold tracking-tight text-slate-900">
-                    Maria Dela Cruz
-                  </h1>
+                  {isEditing ? (
+                    <input
+                      value={profileData.name}
+                      onChange={(event) => handleFieldChange("name", event.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-[1.9rem] font-bold tracking-tight text-slate-900 outline-none focus:border-[#106fb8]"
+                    />
+                  ) : (
+                    <h1 className="text-[1.9rem] sm:text-[2.1rem] font-bold tracking-tight text-slate-900">
+                      {profileData.name}
+                    </h1>
+                  )}
                   <BadgeCheck className="h-5 w-5 text-[#106fb8]" />
                 </div>
 
-                <p className="mt-2 text-sm font-medium text-slate-500">
-                  Scheduler • Team Lead • Cybence Operations
-                </p>
+                {isEditing ? (
+                  <input
+                    value={profileData.title}
+                    onChange={(event) => handleFieldChange("title", event.target.value)}
+                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600 outline-none focus:border-[#106fb8]"
+                  />
+                ) : (
+                  <p className="mt-2 text-sm font-medium text-slate-500">{profileData.title}</p>
+                )}
 
                 <div className="mt-4 flex flex-wrap gap-2">
                   <span className="rounded-full bg-[#106fb8]/10 px-3 py-1 text-xs font-semibold text-[#106fb8]">
@@ -84,30 +157,55 @@ export default function ProfilePage({}: ProfilePageProps) {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <button className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 cursor-pointer shadow-sm">
-                <Edit3 className="h-4 w-4" />
-                Edit Profile
-              </button>
+              {isEditing ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    className="rounded-2xl bg-[#106fb8] px-4 py-3 font-semibold text-white shadow-sm transition-all hover:bg-[#0d5b97]"
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 cursor-pointer shadow-sm"
+                >
+                  <Edit3 className="h-4 w-4" />
+                  Edit Profile
+                </button>
+              )}
             </div>
           </div>
+
+          {isEditing ? (
+            <label className="mt-4 inline-flex w-fit cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-[#106fb8]/40 bg-sky-50 px-4 py-3 text-sm font-semibold text-[#106fb8] transition-all hover:bg-sky-100">
+              <Edit3 className="h-4 w-4" />
+              Upload Profile Picture
+              <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+            </label>
+          ) : null}
         </section>
 
         {/* Balanced Grid Container */}
         <div className="grid gap-6 lg:grid-cols-2 items-start">
-
           {/* Left Column */}
           <div className="space-y-6 flex flex-col">
-
             {/* About */}
             <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">
-                    About Me
-                  </h2>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Professional overview and account details
-                  </p>
+                  <h2 className="text-lg font-semibold text-slate-900">About Me</h2>
+                  <p className="mt-1 text-sm text-slate-500">Professional overview and account details</p>
                 </div>
 
                 <div className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
@@ -116,22 +214,29 @@ export default function ProfilePage({}: ProfilePageProps) {
                 </div>
               </div>
 
-              <p className="mt-5 text-sm leading-7 text-slate-600">
-                Maria is responsible for organizing schedules, ensuring smooth
-                coordination across teams, and maintaining reliable communication
-                with clients. She enjoys creating order out of busy workflows and
-                helping others stay on track.
-              </p>
+              {isEditing ? (
+                <textarea
+                  value={profileData.about}
+                  onChange={(event) => handleFieldChange("about", event.target.value)}
+                  rows={5}
+                  className="mt-5 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-7 text-slate-600 outline-none focus:border-[#106fb8]"
+                />
+              ) : (
+                <p className="mt-5 text-sm leading-7 text-slate-600">{profileData.about}</p>
+              )}
             </section>
 
             {/* Contact Information */}
             <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
-              <h2 className="text-lg font-semibold text-slate-900">
-                Contact Information
-              </h2>
+              <h2 className="text-lg font-semibold text-slate-900">Contact Information</h2>
 
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                {profileDetails.map((item) => {
+                {[
+                  { label: "Email", value: profileData.email, icon: Mail, field: "email" as const },
+                  { label: "Phone", value: profileData.phone, icon: Phone, field: "phone" as const },
+                  { label: "Location", value: profileData.location, icon: MapPin, field: "location" as const },
+                  { label: "Department", value: profileData.department, icon: Briefcase, field: "department" as const },
+                ].map((item) => {
                   const Icon = item.icon;
 
                   return (
@@ -144,9 +249,15 @@ export default function ProfilePage({}: ProfilePageProps) {
                         {item.label}
                       </div>
 
-                      <p className="mt-2 text-sm text-slate-600 truncate">
-                        {item.value}
-                      </p>
+                      {isEditing ? (
+                        <input
+                          value={item.value}
+                          onChange={(event) => handleFieldChange(item.field, event.target.value)}
+                          className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:border-[#106fb8]"
+                        />
+                      ) : (
+                        <p className="mt-2 text-sm text-slate-600 truncate">{item.value}</p>
+                      )}
                     </div>
                   );
                 })}
@@ -156,13 +267,10 @@ export default function ProfilePage({}: ProfilePageProps) {
 
           {/* Right Column */}
           <div className="space-y-6 flex flex-col">
-
             {/* Stats */}
             <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-900">
-                  Performance Snapshot
-                </h2>
+                <h2 className="text-lg font-semibold text-slate-900">Performance Snapshot</h2>
 
                 <Sparkles className="h-5 w-5 text-[#106fb8]" />
               </div>
@@ -173,13 +281,9 @@ export default function ProfilePage({}: ProfilePageProps) {
                     key={stat.label}
                     className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/50 px-4 py-3"
                   >
-                    <span className="text-sm text-slate-500">
-                      {stat.label}
-                    </span>
+                    <span className="text-sm text-slate-500">{stat.label}</span>
 
-                    <span className="text-lg font-bold text-slate-900">
-                      {stat.value}
-                    </span>
+                    <span className="text-lg font-bold text-slate-900">{stat.value}</span>
                   </div>
                 ))}
               </div>
@@ -189,9 +293,7 @@ export default function ProfilePage({}: ProfilePageProps) {
             <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
               <div className="flex items-center gap-2">
                 <CalendarDays className="h-5 w-5 text-[#106fb8]" />
-                <h2 className="text-lg font-semibold text-slate-900">
-                  Upcoming Schedule
-                </h2>
+                <h2 className="text-lg font-semibold text-slate-900">Upcoming Schedule</h2>
               </div>
 
               <div className="mt-5 space-y-3">
@@ -201,13 +303,9 @@ export default function ProfilePage({}: ProfilePageProps) {
                     className="flex items-start justify-between rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all hover:border-[#106fb8]/20 hover:bg-white"
                   >
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">
-                        {item.day}
-                      </p>
+                      <p className="text-sm font-semibold text-slate-800">{item.day}</p>
 
-                      <p className="mt-1 text-sm text-slate-500">
-                        {item.time}
-                      </p>
+                      <p className="mt-1 text-sm text-slate-500">{item.time}</p>
                     </div>
 
                     <Clock3 className="h-4 w-4 text-slate-400" />
@@ -215,7 +313,6 @@ export default function ProfilePage({}: ProfilePageProps) {
                 ))}
               </div>
             </section>
-
           </div>
         </div>
       </div>
