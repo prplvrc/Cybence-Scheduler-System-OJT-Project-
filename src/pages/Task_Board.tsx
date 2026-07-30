@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import {
-  Bell,
   Calendar,
   Clock,
   ChevronDown,
@@ -9,7 +8,6 @@ import {
   Search,
 } from "lucide-react";
 import NewTaskModal from "./New_Task";
-import NotificationPanel from "./Notification"; // Make sure path matches your Notification file location
 import "./Task_Board.css";
 
 interface Task {
@@ -150,7 +148,6 @@ export default function TaskBoard() {
   const [search, setSearch] = useState("");
   const [taskGroups, setTaskGroups] = useState<TaskGroup[]>(initialTaskGroups);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -223,26 +220,6 @@ export default function TaskBoard() {
             <span className="dot">•</span>
             <Clock size={15} />
             <span className="time-str">{formattedTime}</span>
-          </div>
-
-          {/* Notification Button & Dropdown Container */}
-          <div className="relative">
-            <button 
-              className="icon-btn" 
-              aria-label="Notifications"
-              onClick={() => setIsNotificationOpen((prev) => !prev)}
-            >
-              <Bell size={18} />
-            </button>
-
-            {isNotificationOpen && (
-              <div className="absolute right-0 top-[calc(100%+8px)] z-50">
-                <NotificationPanel
-                  isOpen={isNotificationOpen}
-                  onClose={() => setIsNotificationOpen(false)}
-                />
-              </div>
-            )}
           </div>
 
           <button 

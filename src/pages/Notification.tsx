@@ -50,9 +50,11 @@ export default function NotificationPanel({ isOpen, onClose }: NotificationPanel
 
       <div className="max-h-[360px] overflow-y-auto p-2">
         {notifications.map((item) => (
-          <div
+          <button
             key={item.id}
-            className="flex items-start gap-3 rounded-2xl border border-transparent px-3 py-3 transition hover:border-slate-200 hover:bg-slate-50"
+            type="button"
+            onClick={onClose}
+            className="flex w-full items-start gap-3 rounded-2xl border border-transparent px-3 py-3 text-left transition hover:border-slate-200 hover:bg-slate-50"
           >
             <div className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${item.unread ? "bg-[#106fb8]/10 text-[#106fb8]" : "bg-slate-100 text-slate-600"}`}>
               {getIconComponent(item.iconType)}
@@ -67,7 +69,7 @@ export default function NotificationPanel({ isOpen, onClose }: NotificationPanel
               <p className="mt-1 text-sm text-slate-600">{item.message}</p>
               <p className="mt-1 text-xs font-medium text-slate-400">{item.time}</p>
             </div>
-          </div>
+          </button>
         ))}
       </div>
 
