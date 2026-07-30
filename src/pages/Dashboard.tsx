@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   CheckSquare,
   Calendar as CalendarIcon,
+  CalendarDays,
   FileText,
   Settings,
   User,
@@ -48,6 +49,12 @@ export default function Dashboard({ onLogout }: DashboardProps) {
     { id: "1", title: "Task 1", date: "2026-07-07", status: "Completed" },
     { id: "2", title: "Task 2", date: "2026-07-07", status: "Ongoing" },
     { id: "3", title: "Task 3", date: "2026-07-07", status: "To Do" },
+  ];
+
+  const upcomingSchedule = [
+    { day: "Today", time: "09:00 AM - Team Sync" },
+    { day: "Tomorrow", time: "02:00 PM - Client Review" },
+    { day: "Friday", time: "11:30 AM - Training Session" },
   ];
 
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -437,33 +444,59 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                 </div>
               </section>
 
-              <section className="rounded-3xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
-                <h2 className="mb-4 text-lg font-bold text-slate-900">
-                  Team Overview
-                </h2>
+              <section className="flex flex-col gap-4 rounded-3xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
+                <div>
+                  <h2 className="mb-4 text-lg font-bold text-slate-900">
+                    Team Overview
+                  </h2>
 
-                <div className="space-y-4">
-                  {teamMembers.map((member) => (
-                    <div key={member.name} className="space-y-1.5">
-                      <div className="flex justify-between text-xs font-semibold">
-                        <span className="text-slate-800">
-                          {member.name}{" "}
-                          <span className="font-normal text-slate-400">
-                            ({member.role})
+                  <div className="space-y-4">
+                    {teamMembers.map((member) => (
+                      <div key={member.name} className="space-y-1.5">
+                        <div className="flex justify-between text-xs font-semibold">
+                          <span className="text-slate-800">
+                            {member.name}{" "}
+                            <span className="font-normal text-slate-400">
+                              ({member.role})
+                            </span>
                           </span>
-                        </span>
-                        <span className="text-[#106fb8]">
-                          {member.progress}
-                        </span>
+                          <span className="text-[#106fb8]">
+                            {member.progress}
+                          </span>
+                        </div>
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 p-0.5">
+                          <div
+                            className="h-full rounded-full bg-[#106fb8] transition-all duration-500"
+                            style={{ width: member.progress }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 p-0.5">
-                        <div
-                          className="h-full rounded-full bg-[#106fb8] transition-all duration-500"
-                          style={{ width: member.progress }}
-                        />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+                  <div className="flex items-center gap-2">
+                    <CalendarDays className="h-5 w-5 text-[#106fb8]" />
+                    <h3 className="text-sm font-semibold text-slate-900">
+                      Upcoming Schedule
+                    </h3>
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    {upcomingSchedule.map((item) => (
+                      <div
+                        key={item.day}
+                        className="flex items-start justify-between rounded-2xl border border-slate-100 bg-white px-3 py-3"
+                      >
+                        <div>
+                          <p className="text-sm font-semibold text-slate-800">{item.day}</p>
+                          <p className="mt-1 text-sm text-slate-500">{item.time}</p>
+                        </div>
+                        <Clock className="h-4 w-4 text-slate-400" />
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </section>
             </div>
