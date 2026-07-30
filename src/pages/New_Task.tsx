@@ -17,7 +17,7 @@ type NewTaskModalProps = {
   onSubmit: (taskData: NewTaskFormData) => void;
 };
 
-const teamMembers = ["Sarah Chen", "Daniel", "Mae", "Janina", "Perpaulo"];
+const teamMembers = ["Sarah Chen", "Daniel", "Mae", "Janina", "Perpaulo", "Open for anyone to take"];
 const statusOptions = ["Backlog", "To Do", "Ongoing", "Completed", "Unfinished"];
 const priorityOptions = ["Low", "Medium", "High", "Critical"];
 const tagOptions = ["Design", "Development", "Testing", "Documentation", "Bug Fix", "Feature"];
