@@ -229,9 +229,8 @@ const buildTaskGroups = (tasks: Task[]): TaskGroup[] => {
 
 export default function TaskBoard({ tasks, onTasksChange }: TaskBoardProps) {
   const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState<
-    "default" | "date-newest" | "date-oldest" | "priority-low" | "priority-medium" | "priority-high" | "priority-critical"
-  >("default");
+  const [dateSortMode, setDateSortMode] = useState<"default" | "date-newest" | "date-oldest">("default");
+  const [priorityFilter, setPriorityFilter] = useState<"all" | "low" | "medium" | "high" | "critical">("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -258,20 +257,19 @@ export default function TaskBoard({ tasks, onTasksChange }: TaskBoardProps) {
 
   const getVisibleTasks = (tasks: Task[]) => {
     const normalizedSearch = search.toLowerCase();
-    const priorityFilter = viewMode.startsWith("priority-") ? viewMode.replace("priority-", "") : null;
 
     const filteredTasks = tasks.filter((task) => {
       const matchesSearch = task.task.toLowerCase().includes(normalizedSearch);
-      const matchesPriority = !priorityFilter || task.priority.toLowerCase() === priorityFilter.toLowerCase();
+      const matchesPriority = priorityFilter === "all" || task.priority.toLowerCase() === priorityFilter.toLowerCase();
 
       return matchesSearch && matchesPriority;
     });
 
-    if (viewMode === "date-newest") {
+    if (dateSortMode === "date-newest") {
       return [...filteredTasks].sort((a, b) => new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime());
     }
 
-    if (viewMode === "date-oldest") {
+    if (dateSortMode === "date-oldest") {
       return [...filteredTasks].sort((a, b) => new Date(a.createdOn).getTime() - new Date(b.createdOn).getTime());
     }
 
@@ -338,20 +336,24 @@ export default function TaskBoard({ tasks, onTasksChange }: TaskBoardProps) {
 
         <select
           className="sort-select"
-          value={viewMode}
-          onChange={(e) => setViewMode(e.target.value as typeof viewMode)}
+          value={dateSortMode}
+          onChange={(e) => setDateSortMode(e.target.value as typeof dateSortMode)}
         >
           <option value="default">Default</option>
-          <optgroup label="By Date">
-            <option value="date-newest">Newest to oldest</option>
-            <option value="date-oldest">Oldest to newest</option>
-          </optgroup>
-          <optgroup label="By Priority">
-            <option value="priority-low">Low</option>
-            <option value="priority-medium">Medium</option>
-            <option value="priority-high">High</option>
-            <option value="priority-critical">Critical</option>
-          </optgroup>
+          <option value="date-newest">Newest to oldest</option>
+          <option value="date-oldest">Oldest to newest</option>
+        </select>
+
+        <select
+          className="sort-select"
+          value={priorityFilter}
+          onChange={(e) => setPriorityFilter(e.target.value as typeof priorityFilter)}
+        >
+          <option value="all">All</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="critical">Critical</option>
         </select>
       </div>
 
