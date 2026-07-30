@@ -17,6 +17,7 @@ interface Task {
   createdOn: string;
   status: string;
   dueDate: string;
+  priority: string;
 }
 
 interface TaskGroup {
@@ -36,17 +37,19 @@ const initialTaskGroups: TaskGroup[] = [
         id: 1,
         task: "SCHEDULER SYSTEM FOR CYBENCE IT SOLUTIONS",
         creator: "Admin",
-        createdOn: "2026-07-20",
+        createdOn: "2026-07-21",
         status: "Pending",
         dueDate: "2026-07-25",
+        priority: "High",
       },
       {
         id: 2,
         task: "ALGORTHIM OPTIMIZATION FOR ABCD COMPANY'S WEBSITE",
         creator: "Admin",
-        createdOn: "2026-07-20",
+        createdOn: "2026-07-18",
         status: "Pending",
         dueDate: "2026-07-25",
+        priority: "Medium",
       },
     ],
   },
@@ -59,17 +62,19 @@ const initialTaskGroups: TaskGroup[] = [
         id: 3,
         task: "DESIGN AND IMPLEMENTATION OF A NEW USER INTERFACE FOR XYZ APPLICATION",
         creator: "Daniel",
-        createdOn: "2026-07-20",
+        createdOn: "2026-07-19",
         status: "To Do",
         dueDate: "2026-07-27",
+        priority: "Low",
       },
       {
         id: 4,
         task: "DEVELOPMENT OF A MOBILE APPLICATION FOR E-COMMERCE PLATFORM",
         creator: "Mae",
-        createdOn: "2026-07-20",
+        createdOn: "2026-07-17",
         status: "To Do",
         dueDate: "2026-07-27",
+        priority: "Medium",
       },
     ],
   },
@@ -82,17 +87,19 @@ const initialTaskGroups: TaskGroup[] = [
         id: 5,
         task: "IMPLEMENTATION OF A NEW PAYMENT GATEWAY FOR ABCD COMPANY",
         creator: "Janina",
-        createdOn: "2026-07-20",
+        createdOn: "2026-07-16",
         status: "Ongoing",
         dueDate: "2026-07-30",
+        priority: "Critical",
       },
       {
         id: 6,
         task: "ALGORTHIM OPTIMIZATION FOR BYD COMPANY'S WEBSITE",
         creator: "Daniel",
-        createdOn: "2026-07-20",
+        createdOn: "2026-07-15",
         status: "Ongoing",
         dueDate: "2026-07-30",
+        priority: "High",
       },
     ],
   },
@@ -105,17 +112,19 @@ const initialTaskGroups: TaskGroup[] = [
         id: 7,
         task: "SCHEDULER SYSTEM FOR WWW SOLUTIONS",
         creator: "Admin",
-        createdOn: "2026-07-20",
+        createdOn: "2026-07-14",
         status: "Completed",
         dueDate: "2026-07-21",
+        priority: "Low",
       },
       {
         id: 8,
         task: "WEB DEVELOPMENT FOR ABCD COMPANY",
         creator: "Admin",
-        createdOn: "2026-07-20",
+        createdOn: "2026-07-13",
         status: "Completed",
         dueDate: "2026-07-21",
+        priority: "Medium",
       },
     ],
   },
@@ -128,17 +137,19 @@ const initialTaskGroups: TaskGroup[] = [
         id: 9,
         task: "SOFTWARE TESTING FOR XYZ APPLICATION",
         creator: "Admin",
-        createdOn: "2026-07-20",
+        createdOn: "2026-07-12",
         status: "Unfinished",
         dueDate: "2026-07-21",
+        priority: "High",
       },
       {
         id: 10,
         task: "HARDWARE INTEGRATION FOR ABCD COMPANY'S SYSTEM",
         creator: "Admin",
-        createdOn: "2026-07-20",
+        createdOn: "2026-07-11",
         status: "Unfinished",
         dueDate: "2026-07-21",
+        priority: "Low",
       },
     ],
   },
@@ -146,6 +157,9 @@ const initialTaskGroups: TaskGroup[] = [
 
 export default function TaskBoard() {
   const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState<
+    "default" | "date-newest" | "date-oldest" | "priority-low" | "priority-medium" | "priority-high" | "priority-critical"
+  >("default");
   const [taskGroups, setTaskGroups] = useState<TaskGroup[]>(initialTaskGroups);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -171,6 +185,28 @@ export default function TaskBoard() {
     second: "2-digit",
   });
 
+  const getVisibleTasks = (tasks: Task[]) => {
+    const normalizedSearch = search.toLowerCase();
+    const priorityFilter = viewMode.startsWith("priority-") ? viewMode.replace("priority-", "") : null;
+
+    const filteredTasks = tasks.filter((task) => {
+      const matchesSearch = task.task.toLowerCase().includes(normalizedSearch);
+      const matchesPriority = !priorityFilter || task.priority.toLowerCase() === priorityFilter.toLowerCase();
+
+      return matchesSearch && matchesPriority;
+    });
+
+    if (viewMode === "date-newest") {
+      return [...filteredTasks].sort((a, b) => new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime());
+    }
+
+    if (viewMode === "date-oldest") {
+      return [...filteredTasks].sort((a, b) => new Date(a.createdOn).getTime() - new Date(b.createdOn).getTime());
+    }
+
+    return filteredTasks;
+  };
+
   // Handle task creation submission from the modal
   const handleCreateTask = (taskData: any) => {
     const newTask: Task = {
@@ -180,6 +216,7 @@ export default function TaskBoard() {
       createdOn: new Date().toISOString().split("T")[0],
       status: taskData.status,
       dueDate: taskData.dueDate || new Date().toISOString().split("T")[0],
+      priority: taskData.priority || "Medium",
     };
 
     setTaskGroups((prevGroups) =>
@@ -242,6 +279,24 @@ export default function TaskBoard() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+
+        <select
+          className="sort-select"
+          value={viewMode}
+          onChange={(e) => setViewMode(e.target.value as typeof viewMode)}
+        >
+          <option value="default">Default</option>
+          <optgroup label="By Date">
+            <option value="date-newest">Newest to oldest</option>
+            <option value="date-oldest">Oldest to newest</option>
+          </optgroup>
+          <optgroup label="By Priority">
+            <option value="priority-low">Low</option>
+            <option value="priority-medium">Medium</option>
+            <option value="priority-high">High</option>
+            <option value="priority-critical">Critical</option>
+          </optgroup>
+        </select>
       </div>
 
       {/* Accordion List Sections */}
@@ -252,9 +307,7 @@ export default function TaskBoard() {
             title={group.title}
             dotClass={group.dotClass}
             badgeClass={group.badgeClass}
-            tasks={group.tasks.filter((task) =>
-              task.task.toLowerCase().includes(search.toLowerCase())
-            )}
+            tasks={getVisibleTasks(group.tasks)}
           />
         ))}
       </div>

@@ -19,7 +19,7 @@ type NewTaskModalProps = {
 
 const teamMembers = ["Sarah Chen", "Daniel", "Mae", "Janina", "Perpaulo"];
 const statusOptions = ["Backlog", "To Do", "Ongoing", "Completed", "Unfinished"];
-const priorityOptions = ["Low", "Med", "High", "Critical"];
+const priorityOptions = ["Low", "Medium", "High", "Critical"];
 const tagOptions = ["Design", "Development", "Testing", "Documentation", "Bug Fix", "Feature"];
 
 export default function NewTaskModal({ isOpen, onClose, onSubmit }: NewTaskModalProps) {
@@ -29,7 +29,7 @@ export default function NewTaskModal({ isOpen, onClose, onSubmit }: NewTaskModal
     assignTo: "Sarah Chen",
     dueDate: "",
     status: "Backlog",
-    priority: "Med",
+    priority: "Medium",
     tag: "Design",
   });
 
@@ -73,7 +73,7 @@ export default function NewTaskModal({ isOpen, onClose, onSubmit }: NewTaskModal
       assignTo: "Sarah Chen",
       dueDate: "",
       status: "Backlog",
-      priority: "Med",
+      priority: "Medium",
       tag: "Design",
     });
   };
