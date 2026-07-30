@@ -23,6 +23,7 @@ import TaskBoard from "./Task_Board";
 import RequestsPage from "./Requests";
 import SettingsPage from "./Settings";
 import NewTaskModal from "./New_Task";
+import { initialTaskGroups, type Task } from "./Task_Board";
 
 type DashboardProps = {
   onLogout: () => void;
@@ -61,6 +62,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [tasks, setTasks] = useState<Task[]>(() => initialTaskGroups.flatMap((group) => group.tasks));
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -255,9 +257,9 @@ export default function Dashboard({ onLogout }: DashboardProps) {
         {activeTab === "profile" ? (
           <ProfilePage onBackToDashboard={() => setActiveTab("dashboard")} />
         ) : activeTab === "calendar" ? (
-          <CalendarPage />
+          <CalendarPage tasks={tasks} onTasksChange={setTasks} currentUserName="Perpaulo" />
         ) : activeTab === "tasks" ? (
-          <TaskBoard />
+          <TaskBoard tasks={tasks} onTasksChange={setTasks} />
         ) : activeTab === "requests" ? (
           <RequestsPage />
         ) : activeTab === "settings" ? (

@@ -10,24 +10,25 @@ import {
 import NewTaskModal from "./New_Task";
 import "./Task_Board.css";
 
-interface Task {
+export interface Task {
   id: number;
   task: string;
   creator: string;
+  assignedTo: string;
   createdOn: string;
   status: string;
   dueDate: string;
   priority: string;
 }
 
-interface TaskGroup {
+export interface TaskGroup {
   title: string;
   dotClass: string;
   badgeClass: string;
   tasks: Task[];
 }
 
-const initialTaskGroups: TaskGroup[] = [
+export const initialTaskGroups: TaskGroup[] = [
   {
     title: "To Be Assigned",
     dotClass: "dot-pending",
@@ -37,6 +38,7 @@ const initialTaskGroups: TaskGroup[] = [
         id: 1,
         task: "SCHEDULER SYSTEM FOR CYBENCE IT SOLUTIONS",
         creator: "Admin",
+        assignedTo: "Perpaulo",
         createdOn: "2026-07-21",
         status: "Pending",
         dueDate: "2026-07-25",
@@ -46,6 +48,7 @@ const initialTaskGroups: TaskGroup[] = [
         id: 2,
         task: "ALGORTHIM OPTIMIZATION FOR ABCD COMPANY'S WEBSITE",
         creator: "Admin",
+        assignedTo: "Sarah Chen",
         createdOn: "2026-07-18",
         status: "Pending",
         dueDate: "2026-07-25",
@@ -62,6 +65,7 @@ const initialTaskGroups: TaskGroup[] = [
         id: 3,
         task: "DESIGN AND IMPLEMENTATION OF A NEW USER INTERFACE FOR XYZ APPLICATION",
         creator: "Daniel",
+        assignedTo: "Mae",
         createdOn: "2026-07-19",
         status: "To Do",
         dueDate: "2026-07-27",
@@ -71,6 +75,7 @@ const initialTaskGroups: TaskGroup[] = [
         id: 4,
         task: "DEVELOPMENT OF A MOBILE APPLICATION FOR E-COMMERCE PLATFORM",
         creator: "Mae",
+        assignedTo: "Daniel",
         createdOn: "2026-07-17",
         status: "To Do",
         dueDate: "2026-07-27",
@@ -87,6 +92,7 @@ const initialTaskGroups: TaskGroup[] = [
         id: 5,
         task: "IMPLEMENTATION OF A NEW PAYMENT GATEWAY FOR ABCD COMPANY",
         creator: "Janina",
+        assignedTo: "Perpaulo",
         createdOn: "2026-07-16",
         status: "Ongoing",
         dueDate: "2026-07-30",
@@ -96,6 +102,7 @@ const initialTaskGroups: TaskGroup[] = [
         id: 6,
         task: "ALGORTHIM OPTIMIZATION FOR BYD COMPANY'S WEBSITE",
         creator: "Daniel",
+        assignedTo: "Janina",
         createdOn: "2026-07-15",
         status: "Ongoing",
         dueDate: "2026-07-30",
@@ -112,15 +119,17 @@ const initialTaskGroups: TaskGroup[] = [
         id: 7,
         task: "SCHEDULER SYSTEM FOR WWW SOLUTIONS",
         creator: "Admin",
+        assignedTo: "Sarah Chen",
         createdOn: "2026-07-14",
         status: "Completed",
-        dueDate: "2026-07-21",
+        dueDate: "2026-07-31",
         priority: "Low",
       },
       {
         id: 8,
         task: "WEB DEVELOPMENT FOR ABCD COMPANY",
         creator: "Admin",
+        assignedTo: "Mae",
         createdOn: "2026-07-13",
         status: "Completed",
         dueDate: "2026-07-21",
@@ -137,6 +146,7 @@ const initialTaskGroups: TaskGroup[] = [
         id: 9,
         task: "SOFTWARE TESTING FOR XYZ APPLICATION",
         creator: "Admin",
+        assignedTo: "Daniel",
         createdOn: "2026-07-12",
         status: "Unfinished",
         dueDate: "2026-07-21",
@@ -146,6 +156,7 @@ const initialTaskGroups: TaskGroup[] = [
         id: 10,
         task: "HARDWARE INTEGRATION FOR ABCD COMPANY'S SYSTEM",
         creator: "Admin",
+        assignedTo: "Perpaulo",
         createdOn: "2026-07-11",
         status: "Unfinished",
         dueDate: "2026-07-21",
@@ -155,12 +166,72 @@ const initialTaskGroups: TaskGroup[] = [
   },
 ];
 
-export default function TaskBoard() {
+type TaskBoardProps = {
+  tasks: Task[];
+  onTasksChange: (tasks: Task[]) => void;
+};
+
+const buildTaskGroups = (tasks: Task[]): TaskGroup[] => {
+  const groupMap: Record<string, TaskGroup> = {
+    "To Be Assigned": {
+      title: "To Be Assigned",
+      dotClass: "dot-pending",
+      badgeClass: "badge-pending",
+      tasks: [],
+    },
+    "To Do": {
+      title: "To Do",
+      dotClass: "dot-todo",
+      badgeClass: "badge-todo",
+      tasks: [],
+    },
+    Ongoing: {
+      title: "Ongoing",
+      dotClass: "dot-progress",
+      badgeClass: "badge-progress",
+      tasks: [],
+    },
+    Completed: {
+      title: "Completed",
+      dotClass: "dot-completed",
+      badgeClass: "badge-done",
+      tasks: [],
+    },
+    Unfinished: {
+      title: "Unfinished",
+      dotClass: "dot-unfinished",
+      badgeClass: "badge-unfinished",
+      tasks: [],
+    },
+  };
+
+  tasks.forEach((task) => {
+    const groupTitle =
+      task.status === "Backlog" || task.status === "Pending"
+        ? "To Be Assigned"
+        : task.status === "To Do"
+        ? "To Do"
+        : task.status === "Ongoing"
+        ? "Ongoing"
+        : task.status === "Completed"
+        ? "Completed"
+        : task.status === "Unfinished"
+        ? "Unfinished"
+        : "To Be Assigned";
+
+    if (groupMap[groupTitle]) {
+      groupMap[groupTitle].tasks.push(task);
+    }
+  });
+
+  return Object.values(groupMap);
+};
+
+export default function TaskBoard({ tasks, onTasksChange }: TaskBoardProps) {
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<
     "default" | "date-newest" | "date-oldest" | "priority-low" | "priority-medium" | "priority-high" | "priority-critical"
   >("default");
-  const [taskGroups, setTaskGroups] = useState<TaskGroup[]>(initialTaskGroups);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -207,37 +278,22 @@ export default function TaskBoard() {
     return filteredTasks;
   };
 
+  const taskGroups = buildTaskGroups(tasks);
+
   // Handle task creation submission from the modal
   const handleCreateTask = (taskData: any) => {
     const newTask: Task = {
       id: Date.now(),
       task: taskData.title,
-      creator: taskData.assignTo,
+      creator: "You",
+      assignedTo: taskData.assignTo === "Open for anyone to take" ? "Open" : taskData.assignTo,
       createdOn: new Date().toISOString().split("T")[0],
       status: taskData.status,
       dueDate: taskData.dueDate || new Date().toISOString().split("T")[0],
       priority: taskData.priority || "Medium",
     };
 
-    setTaskGroups((prevGroups) =>
-      prevGroups.map((group) => {
-        const matchesGroup =
-          (group.title === "To Do" && taskData.status === "To Do") ||
-          (group.title === "Ongoing" && taskData.status === "Ongoing") ||
-          (group.title === "Completed" && taskData.status === "Completed") ||
-          (group.title === "Unfinished" && taskData.status === "Unfinished") ||
-          (group.title === "To Be Assigned" && taskData.status === "Backlog");
-
-        if (matchesGroup) {
-          return {
-            ...group,
-            tasks: [newTask, ...group.tasks],
-          };
-        }
-        return group;
-      })
-    );
-
+    onTasksChange([...tasks, newTask]);
     setIsModalOpen(false);
   };
 
@@ -322,6 +378,17 @@ export default function TaskBoard() {
   );
 }
 
+const formatDate = (value: string) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
 function TaskSection({
   title,
   dotClass,
@@ -363,10 +430,10 @@ function TaskSection({
               <tr>
                 <th className="th-cell">TASK</th>
                 <th className="th-cell">CREATOR</th>
+                <th className="th-cell">ASSIGNED TO</th>
                 <th className="th-cell">CREATED ON</th>
-                <th className="th-cell">STATUS</th>
                 <th className="th-cell">DUE DATE</th>
-                <th className="th-cell text-center">VIEWED BY</th>
+                <th className="th-cell viewed-by-header">VIEWED BY</th>
               </tr>
             </thead>
 
@@ -377,23 +444,19 @@ function TaskSection({
                     {task.task}
                   </td>
                   <td className="td-cell text-slate-600">{task.creator}</td>
-                  <td className="td-cell text-slate-500">{task.createdOn}</td>
-                  <td className="td-cell">
-                    <span className={`status-pill ${badgeClass}`}>
-                      {task.status}
-                    </span>
-                  </td>
-                  <td className="td-cell text-slate-600">{task.dueDate}</td>
-                  <td className="td-cell">
+                  <td className="td-cell text-slate-600">{task.assignedTo}</td>
+                  <td className="td-cell text-slate-500">{formatDate(task.createdOn)}</td>
+                  <td className="td-cell text-slate-600">{formatDate(task.dueDate)}</td>
+                  <td className="td-cell viewed-by-cell">
                     <div className="views-container">
                       <div className="eye-circle">
-                        <Eye size={13} />
+                        <Eye size={11} />
                       </div>
                       <div className="eye-circle">
-                        <Eye size={13} />
+                        <Eye size={11} />
                       </div>
                       <div className="eye-circle">
-                        <Eye size={13} />
+                        <Eye size={11} />
                       </div>
                     </div>
                   </td>

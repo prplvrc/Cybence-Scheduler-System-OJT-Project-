@@ -257,6 +257,7 @@
 .task-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   font-size: 13px;
   text-align: left;
 }
@@ -270,6 +271,35 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.th-cell:nth-child(1), .td-cell:nth-child(1) {
+  width: 36%;
+}
+
+.th-cell:nth-child(2), .td-cell:nth-child(2) {
+  width: 13%;
+}
+
+.th-cell:nth-child(3), .td-cell:nth-child(3) {
+  width: 13%;
+}
+
+.th-cell:nth-child(4), .td-cell:nth-child(4) {
+  width: 10%;
+  padding-right: 28px;
+}
+
+.th-cell:nth-child(5), .td-cell:nth-child(5) {
+  width: 12%;
+  padding-left: 32px;
+  padding-right: 16px;
+}
+
+.th-cell:nth-child(6), .td-cell:nth-child(6) {
+  width: 84px;
+  padding-left: 18px;
 }
 
 .table-row {
@@ -293,6 +323,17 @@
   color: #334155;
 }
 
+.td-cell:first-child {
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.td-cell:nth-child(4),
+.td-cell:nth-child(5),
+.td-cell:nth-child(6) {
+  white-space: nowrap;
+}
+
 /* Status Pills */
 .status-pill {
   font-size: 11px;
@@ -310,15 +351,28 @@
 .badge-unfinished { background-color: #fee2e2; color: #b91c1c; }
 
 /* Views Indicator */
+.viewed-by-header {
+  width: 84px;
+  min-width: 84px;
+  text-align: center;
+}
+
+.viewed-by-cell {
+  width: 84px;
+  min-width: 84px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
 .views-container {
   display: flex;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 .eye-circle {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #f1f5f9;
   color: #64748b;
