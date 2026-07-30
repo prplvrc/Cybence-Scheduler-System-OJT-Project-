@@ -2,11 +2,8 @@ import { useEffect, useState, type ChangeEvent } from "react";
 import {
   BadgeCheck,
   Briefcase,
-  CalendarDays,
-  Clock3,
   Edit3,
   Mail,
-  MapPin,
   Phone,
   ShieldCheck,
   Sparkles,
@@ -18,7 +15,6 @@ type ProfileFormState = {
   about: string;
   email: string;
   phone: string;
-  location: string;
   department: string;
 };
 
@@ -29,7 +25,6 @@ const initialProfile: ProfileFormState = {
     "Maria is responsible for organizing schedules, ensuring smooth coordination across teams, and maintaining reliable communication with clients. She enjoys creating order out of busy workflows and helping others stay on track.",
   email: "maria.dela.cruz@cybence.com",
   phone: "+63 912 345 6789",
-  location: "Quezon City, Philippines",
   department: "Operations & Scheduling",
 };
 
@@ -37,12 +32,6 @@ const stats = [
   { label: "Assignments", value: "12" },
   { label: "Attendance", value: "98%" },
   { label: "Upcoming Tasks", value: "4" },
-];
-
-const schedule = [
-  { day: "Today", time: "09:00 AM - Team Sync" },
-  { day: "Tomorrow", time: "02:00 PM - Client Review" },
-  { day: "Friday", time: "11:30 AM - Training Session" },
 ];
 
 type ProfilePageProps = {
@@ -234,7 +223,6 @@ export default function ProfilePage({}: ProfilePageProps) {
                 {[
                   { label: "Email", value: profileData.email, icon: Mail, field: "email" as const },
                   { label: "Phone", value: profileData.phone, icon: Phone, field: "phone" as const },
-                  { label: "Location", value: profileData.location, icon: MapPin, field: "location" as const },
                   { label: "Department", value: profileData.department, icon: Briefcase, field: "department" as const },
                 ].map((item) => {
                   const Icon = item.icon;
@@ -289,30 +277,6 @@ export default function ProfilePage({}: ProfilePageProps) {
               </div>
             </section>
 
-            {/* Schedule */}
-            <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
-              <div className="flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-[#106fb8]" />
-                <h2 className="text-lg font-semibold text-slate-900">Upcoming Schedule</h2>
-              </div>
-
-              <div className="mt-5 space-y-3">
-                {schedule.map((item) => (
-                  <div
-                    key={item.day}
-                    className="flex items-start justify-between rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all hover:border-[#106fb8]/20 hover:bg-white"
-                  >
-                    <div>
-                      <p className="text-sm font-semibold text-slate-800">{item.day}</p>
-
-                      <p className="mt-1 text-sm text-slate-500">{item.time}</p>
-                    </div>
-
-                    <Clock3 className="h-4 w-4 text-slate-400" />
-                  </div>
-                ))}
-              </div>
-            </section>
           </div>
         </div>
       </div>

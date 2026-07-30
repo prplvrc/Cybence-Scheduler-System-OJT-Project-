@@ -9,7 +9,6 @@ type ProfileSettings = {
 };
 
 type NotificationSettings = {
-  email: boolean;
   push: boolean;
   weeklyDigest: boolean;
 };
@@ -31,7 +30,6 @@ export default function Settings() {
   });
 
   const [notifications, setNotifications] = useState<NotificationSettings>({
-    email: true,
     push: false,
     weeklyDigest: true,
   });
@@ -45,7 +43,6 @@ export default function Settings() {
   const tabs: Tab[] = ['profile', 'notifications', 'security'];
   
   const notificationOptions: Array<{ key: keyof NotificationSettings; label: string; desc: string }> = [
-    { key: 'email', label: 'Email', desc: 'Receive instant task and workspace alerts via email.' },
     { key: 'push', label: 'Push', desc: 'Get browser push notifications for urgent updates.' },
     { key: 'weeklyDigest', label: 'Weekly Digest', desc: 'Receive a weekly summary report of your activities.' },
   ];
