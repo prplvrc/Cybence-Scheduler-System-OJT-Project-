@@ -4,12 +4,59 @@ import NewTaskModal from "./New_Task";
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+interface CalendarTask {
+  id: number;
+  title: string;
+  owner: string;
+  status: string;
+  time: string;
+  day: number;
+  month: number;
+  year: number;
+}
+
+const currentAccountOwner = "Perpaulo Varca";
+
+const initialCalendarTasks: CalendarTask[] = [
+  {
+    id: 1,
+    title: "Review Project Proposal",
+    owner: currentAccountOwner,
+    status: "Pending",
+    time: "2:00 PM",
+    day: 5,
+    month: 6,
+    year: 2026,
+  },
+  {
+    id: 2,
+    title: "Team Sync & Standup",
+    owner: currentAccountOwner,
+    status: "Completed",
+    time: "4:30 PM",
+    day: 12,
+    month: 6,
+    year: 2026,
+  },
+  {
+    id: 3,
+    title: "Client Follow-up",
+    owner: "Sarah Chen",
+    status: "Pending",
+    time: "1:00 PM",
+    day: 12,
+    month: 6,
+    year: 2026,
+  },
+];
+
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(
     new Date().getDate()
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [calendarTasks, setCalendarTasks] = useState<CalendarTask[]>(initialCalendarTasks);
 
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
@@ -61,8 +108,29 @@ export default function Calendar() {
     setSelectedDay(now.getDate());
   };
 
+  const ownerTasks = calendarTasks.filter(
+    (task) =>
+      task.owner === currentAccountOwner &&
+      task.month === currentMonth &&
+      task.year === currentYear
+  );
+
+  const selectedDayTasks = ownerTasks.filter((task) => task.day === selectedDay);
+  const taskDaysWithOwnerTasks = new Set(ownerTasks.map((task) => task.day));
+
   const handleCreateTask = (taskData: any) => {
-    console.log("New task created from calendar:", taskData);
+    const newTask: CalendarTask = {
+      id: Date.now(),
+      title: taskData.title,
+      owner: currentAccountOwner,
+      status: taskData.status || "Pending",
+      time: taskData.dueDate ? "Scheduled" : "TBD",
+      day: selectedDay,
+      month: currentMonth,
+      year: currentYear,
+    };
+
+    setCalendarTasks((prev) => [newTask, ...prev]);
     setIsModalOpen(false);
   };
 
@@ -185,7 +253,7 @@ export default function Calendar() {
                     {day}
                   </span>
 
-                  {[5, 12, 20, 27].includes(day) && (
+                  {taskDaysWithOwnerTasks.has(day) && (
                     <span className="task-indicator" />
                   )}
                 </button>
@@ -208,49 +276,31 @@ export default function Calendar() {
               Scheduled
             </span>
 
-            <div className="task-item-card">
-              <div className="task-item-top">
-                <span className="task-name">
-                  Review Project Proposal
-                </span>
+            {selectedDayTasks.length > 0 ? (
+              selectedDayTasks.map((task) => (
+                <div className="task-item-card" key={task.id}>
+                  <div className="task-item-top">
+                    <span className="task-name">{task.title}</span>
 
-                <span className="badge badge-pending">
-                  Pending
-                </span>
+                    <span className={`badge ${task.status === "Completed" ? "badge-done" : "badge-pending"}`}>
+                      {task.status}
+                    </span>
+                  </div>
+
+                  <div className="task-item-bottom">
+                    <span className="assignee">Assigned to: {task.owner}</span>
+
+                    <span className="time">{task.time}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="task-item-card">
+                <div className="task-item-top">
+                  <span className="task-name">No tasks for you on this day</span>
+                </div>
               </div>
-
-              <div className="task-item-bottom">
-                <span className="assignee">
-                  Assigned to: Perpaulo
-                </span>
-
-                <span className="time">
-                  2:00 PM
-                </span>
-              </div>
-            </div>
-
-            <div className="task-item-card">
-              <div className="task-item-top">
-                <span className="task-name">
-                  Team Sync & Standup
-                </span>
-
-                <span className="badge badge-done">
-                  Completed
-                </span>
-              </div>
-
-              <div className="task-item-bottom">
-                <span className="assignee">
-                  Assigned to: Dev Team
-                </span>
-
-                <span className="time">
-                  4:30 PM
-                </span>
-              </div>
-            </div>
+            )}
           </div>
         </aside>
       </div>
