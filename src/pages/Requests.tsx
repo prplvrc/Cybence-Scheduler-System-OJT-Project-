@@ -1,15 +1,18 @@
 import { useState, type FormEvent } from "react";
 
 export default function RequestPage() {
-  const [leaveType, setLeaveType] = useState("Personal Leave");
+  const [requestType, setRequestType] = useState("Due Date Extension");
   const [otherReason, setOtherReason] = useState("");
   const [formData, setFormData] = useState({
     fullName: "Perpaulo Varca",
+    department: "",
+    position: "",
     supervisor: "",
     contactNumber: "",
     email: "perpaulo.varca@cybence.com",
-    startDate: "",
-    endDate: "",
+    taskName: "",
+    currentDueDate: "",
+    requestedDueDate: "",
   });
   const [submitted, setSubmitted] = useState(false);
 
@@ -24,20 +27,20 @@ export default function RequestPage() {
       {/* Page Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800">Request Form</h1>
-        <p className="text-sm text-slate-500">Submit an official employee leave application.</p>
+        <p className="text-sm text-slate-500">Submit a formal request for a due date extension or task change.</p>
       </div>
 
       {/* Success Notification Banner */}
       {submitted && (
         <div className="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm font-medium">
-          Leave request submitted successfully and forwarded to your supervisor!
+          Request submitted successfully and forwarded to your supervisor!
         </div>
       )}
 
       {/* Main Card Container */}
       <div className="rounded-2xl bg-white p-8 shadow-sm border border-slate-100">
         <div className="mb-6 border-b border-slate-100 pb-4">
-          <h2 className="text-lg font-bold text-slate-800">Employee Leave Request Form</h2>
+          <h2 className="text-lg font-bold text-slate-800">Task Request Form</h2>
           <p className="text-sm text-slate-500">Please fill out all required fields accurately.</p>
         </div>
 
@@ -52,7 +55,7 @@ export default function RequestPage() {
 
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                  Full Name
+                  Task Assigned To
                 </label>
                 <input
                   type="text"
@@ -63,18 +66,44 @@ export default function RequestPage() {
                 />
               </div>
 
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                  Supervisor / Manager
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g., Jane Doe"
-                  value={formData.supervisor}
-                  onChange={(e) => setFormData({ ...formData, supervisor: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm outline-none focus:border-[#106fb8] focus:bg-white transition"
-                />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                    Department
+                  </label>
+                  <select
+                    required
+                    value={formData.department}
+                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm outline-none focus:border-[#106fb8] focus:bg-white transition"
+                  >
+                    <option value="">Select department</option>
+                    <option value="Operations">Operations</option>
+                    <option value="Development">Development</option>
+                    <option value="Design">Design</option>
+                    <option value="Quality Assurance">Quality Assurance</option>
+                    <option value="Management">Management</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                    Position
+                  </label>
+                  <select
+                    required
+                    value={formData.position}
+                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm outline-none focus:border-[#106fb8] focus:bg-white transition"
+                  >
+                    <option value="">Select position</option>
+                    <option value="Team Lead">Team Lead</option>
+                    <option value="Developer">Developer</option>
+                    <option value="Designer">Designer</option>
+                    <option value="QA Specialist">QA Specialist</option>
+                    <option value="Manager">Manager</option>
+                  </select>
+                </div>
               </div>
 
               <div>
@@ -105,38 +134,65 @@ export default function RequestPage() {
               </div>
             </div>
 
-            {/* Right Side: Leave Details, Dates & Submit Button */}
+            {/* Right Side: Request Details, Dates & Submit Button */}
             <div className="space-y-5 lg:border-l lg:border-slate-100 lg:pl-8 flex flex-col justify-between">
               <div className="space-y-5">
                 <h3 className="font-semibold text-slate-800 pb-1 border-b border-slate-100">
-                  2. Leave Details
+                  2. Request Details
                 </h3>
 
                 <div>
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                    Task Creator
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g., Jane Doe"
+                    value={formData.supervisor}
+                    onChange={(e) => setFormData({ ...formData, supervisor: e.target.value })}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm outline-none focus:border-[#106fb8] focus:bg-white transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                    Task Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g., UI Design Update"
+                    value={formData.taskName}
+                    onChange={(e) => setFormData({ ...formData, taskName: e.target.value })}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm outline-none focus:border-[#106fb8] focus:bg-white transition"
+                  />
+                </div>
+
+                <div>
                   <label className="mb-2 block text-sm font-medium text-slate-700">
-                    Leave Type
+                    Request Type
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {[
-                      "Vacation Leave",
-                      "Emergency Leave",
-                      "Personal Leave",
+                      "Due Date Extension",
+                      "Revision of Task",
                       "Other",
                     ].map((type) => (
                       <label
                         key={type}
                         className={`flex items-center gap-2.5 p-3 rounded-xl border text-sm cursor-pointer transition ${
-                          leaveType === type 
+                          requestType === type 
                             ? 'border-[#106fb8] bg-blue-50/40 text-[#106fb8] font-medium' 
                             : 'border-slate-200 hover:bg-slate-50 text-slate-600'
                         }`}
                       >
                         <input
                           type="radio"
-                          name="leaveType"
+                          name="requestType"
                           value={type}
-                          checked={leaveType === type}
-                          onChange={(e) => setLeaveType(e.target.value)}
+                          checked={requestType === type}
+                          onChange={(e) => setRequestType(e.target.value)}
                           className="text-[#106fb8] focus:ring-[#106fb8]"
                         />
                         {type}
@@ -146,7 +202,7 @@ export default function RequestPage() {
                 </div>
 
                 {/* Conditional "Please Specify" input field */}
-                {leaveType === "Other" && (
+                {requestType === "Other" && (
                   <div>
                     <label className="mb-1.5 block text-sm font-medium text-slate-700">
                       Please Specify Reason
@@ -154,7 +210,7 @@ export default function RequestPage() {
                     <input
                       type="text"
                       required
-                      placeholder="e.g., Maternity/Paternity Leave"
+                      placeholder="e.g., Reassigning task ownership"
                       value={otherReason}
                       onChange={(e) => setOtherReason(e.target.value)}
                       className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm outline-none focus:border-[#106fb8] focus:bg-white transition"
@@ -165,26 +221,26 @@ export default function RequestPage() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 pt-2">
                   <div>
                     <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                      Leave Start Date
+                      Current Due Date
                     </label>
                     <input
                       type="date"
                       required
-                      value={formData.startDate}
-                      onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                      value={formData.currentDueDate}
+                      onChange={(e) => setFormData({ ...formData, currentDueDate: e.target.value })}
                       className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm outline-none focus:border-[#106fb8] focus:bg-white transition"
                     />
                   </div>
 
                   <div>
                     <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                      Leave End Date
+                      Requested Due Date
                     </label>
                     <input
                       type="date"
                       required
-                      value={formData.endDate}
-                      onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                      value={formData.requestedDueDate}
+                      onChange={(e) => setFormData({ ...formData, requestedDueDate: e.target.value })}
                       className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm outline-none focus:border-[#106fb8] focus:bg-white transition"
                     />
                   </div>
