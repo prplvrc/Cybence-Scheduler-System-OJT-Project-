@@ -3,7 +3,6 @@ import {
   LayoutDashboard,
   CheckSquare,
   Calendar as CalendarIcon,
-  CalendarDays,
   FileText,
   Settings,
   User,
@@ -61,6 +60,9 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
   ];
 
   const [activeTab, setActiveTab] = useState("dashboard");
+
+  const currentTab =
+    highlightedTaskId != null ? "tasks" : activeTab;
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -70,12 +72,6 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-
-  useEffect(() => {
-    if (highlightedTaskId !== null && highlightedTaskId !== undefined) {
-      setActiveTab("tasks");
-    }
-  }, [highlightedTaskId]);
 
   const greeting =
     currentTime.getHours() < 12
@@ -100,9 +96,9 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
     <div className="relative flex h-screen w-screen overflow-hidden bg-slate-50">
       {/* AMBIENT MESH BACKGROUND */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] -left-[10%] h-[50vh] w-[70vw] rotate-[-25deg] rounded-[100%] bg-gradient-to-br from-[#106fb8]/35 to-sky-300/20 blur-[130px]" />
-        <div className="absolute -bottom-[20%] -right-[10%] h-[55vh] w-[75vw] rotate-[20deg] rounded-[100%] bg-gradient-to-tl from-sky-400/35 to-[#106fb8]/20 blur-[140px]" />
-        <div className="absolute left-1/2 top-1/2 h-[400px] w-[90vw] max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-200/30 blur-[150px]" />
+        <div className="absolute top-[-20%] left-[-10%] h-[50vh] w-[70vw] rotate-[-25deg] rounded-[100%] bg-linear-to-br from-[#106fb8]/35 to-sky-300/20 blur-[130px]" />
+        <div className="absolute bottom-[-20%] right-[-10%] h-[55vh] w-[75vw] rotate-20 rounded-[100%] bg-linear-to-tl from-sky-400/35 to-[#106fb8]/20 blur-[140px]" />
+        <div className="absolute left-1/2 top-1/2 h-100 w-[90vw] max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-200/30 blur-[150px]" />
       </div>
 
       {/* MOBILE BACKDROP */}
@@ -115,7 +111,7 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
 
       {/* SIDEBAR */}
       <aside
-        className={`fixed inset-y-0 left-0 z-30 flex h-full w-[260px] shrink-0 flex-col justify-between border-r border-white/60 bg-white/80 p-4 backdrop-blur-2xl shadow-2xl transition-transform duration-300 lg:shadow-none lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-30 flex h-full w-60 shrink-0 flex-col justify-between border-r border-white/60 bg-white/80 p-4 backdrop-blur-2xl shadow-2xl transition-transform duration-300 lg:shadow-none lg:static lg:translate-x-0 ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -163,7 +159,7 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
                 <SidebarItem
                   icon={<LayoutDashboard size={18} />}
                   label="Dashboard"
-                  active={activeTab === "dashboard"}
+                  active={currentTab === "dashboard"}
                   onClick={() => {
                     setActiveTab("dashboard");
                     setIsMobileMenuOpen(false);
@@ -172,7 +168,7 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
                 <SidebarItem
                   icon={<CheckSquare size={18} />}
                   label="Task"
-                  active={activeTab === "tasks"}
+                  active={currentTab === "tasks"}
                   onClick={() => {
                     setActiveTab("tasks");
                     setIsMobileMenuOpen(false);
@@ -181,7 +177,7 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
                 <SidebarItem
                   icon={<CalendarIcon size={18} />}
                   label="Calendar"
-                  active={activeTab === "calendar"}
+                  active={currentTab === "calendar"}
                   onClick={() => {
                     setActiveTab("calendar");
                     setIsMobileMenuOpen(false);
@@ -190,7 +186,7 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
                 <SidebarItem
                   icon={<FileText size={18} />}
                   label="Requests"
-                  active={activeTab === "requests"}
+                  active={currentTab === "requests"}
                   onClick={() => {
                     setActiveTab("requests");
                     setIsMobileMenuOpen(false);
@@ -207,7 +203,7 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
                 <SidebarItem
                   icon={<Settings size={18} />}
                   label="Settings"
-                  active={activeTab === "settings"}
+                  active={currentTab === "settings"}
                   onClick={() => {
                     setActiveTab("settings");
                     setIsMobileMenuOpen(false);
@@ -216,7 +212,7 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
                 <SidebarItem
                   icon={<User size={18} />}
                   label="Profile"
-                  active={activeTab === "profile"}
+                  active={currentTab === "profile"}
                   onClick={() => {
                     setActiveTab("profile");
                     setIsMobileMenuOpen(false);
@@ -282,7 +278,7 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
             {/* HEADER BAR */}
             <section className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
               {/* GRADIENT ACCENT BAR */}
-              <div className="absolute left-0 top-0 h-1 w-full rounded-t-3xl bg-gradient-to-r from-sky-400 via-sky-500 to-[#106fb8] shadow-[0_2px_8px_rgba(16,111,184,0.3)]" />
+              <div className="absolute left-0 top-0 h-1 w-full rounded-t-3xl bg-linear-to-r from-sky-400 via-sky-500 to-[#106fb8] shadow-[0_2px_8px_rgba(16,111,184,0.3)]" />
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
@@ -373,9 +369,9 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
                       <div className="absolute -top-7 opacity-0 transition-opacity group-hover:opacity-100 rounded-lg bg-slate-800 px-2 py-0.5 text-[10px] text-white pointer-events-none">
                         {item.value} tasks
                       </div>
-                      <div className="flex h-full w-full max-w-[36px] items-end justify-center rounded-2xl bg-slate-100 p-1 transition-colors group-hover:bg-sky-100">
+                      <div className="flex h-full w-full max-w-9 items-end justify-center rounded-2xl bg-slate-100 p-1 transition-colors group-hover:bg-sky-100">
                         <div
-                          className="w-full rounded-xl bg-gradient-to-t from-[#106fb8] to-sky-400 shadow-sm transition-all duration-500"
+                          className="w-full rounded-xl bg-linear-to-t from-[#106fb8] to-sky-400 shadow-sm transition-all duration-500"
                           style={{
                             height: `${(item.value / 8) * 100}%`,
                           }}
