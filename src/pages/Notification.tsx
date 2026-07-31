@@ -4,6 +4,7 @@ import { generateNotifications } from "../utils/notificationGenerator";
 type NotificationPanelProps = {
   isOpen: boolean;
   onClose: () => void;
+  onSelectNotification?: (taskId: number | null) => void;
 };
 
 const getIconComponent = (iconType: string) => {
@@ -24,7 +25,7 @@ const getIconComponent = (iconType: string) => {
   }
 };
 
-export default function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
+export default function NotificationPanel({ isOpen, onClose, onSelectNotification }: NotificationPanelProps) {
   const notifications = generateNotifications();
   if (!isOpen) return null;
 
@@ -53,7 +54,10 @@ export default function NotificationPanel({ isOpen, onClose }: NotificationPanel
           <button
             key={item.id}
             type="button"
-            onClick={onClose}
+            onClick={() => {
+              onSelectNotification?.(item.taskId ?? null);
+              onClose();
+            }}
             className="flex w-full items-start gap-3 rounded-2xl border border-transparent px-3 py-3 text-left transition hover:border-slate-200 hover:bg-slate-50"
           >
             <div className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${item.unread ? "bg-[#106fb8]/10 text-[#106fb8]" : "bg-slate-100 text-slate-600"}`}>

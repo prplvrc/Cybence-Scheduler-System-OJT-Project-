@@ -169,6 +169,8 @@ export const initialTaskGroups: TaskGroup[] = [
 type TaskBoardProps = {
   tasks: Task[];
   onTasksChange: (tasks: Task[]) => void;
+  highlightTaskId?: number | null;
+  onHighlightHandled?: () => void;
 };
 
 const buildTaskGroups = (tasks: Task[]): TaskGroup[] => {
@@ -227,13 +229,33 @@ const buildTaskGroups = (tasks: Task[]): TaskGroup[] => {
   return Object.values(groupMap);
 };
 
-export default function TaskBoard({ tasks, onTasksChange }: TaskBoardProps) {
+export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHighlightHandled }: TaskBoardProps) {
   const [search, setSearch] = useState("");
   const [dateSortMode, setDateSortMode] = useState<"default" | "date-newest" | "date-oldest">("default");
   const [priorityFilter, setPriorityFilter] = useState<"all" | "low" | "medium" | "high" | "critical">("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    if (!highlightTaskId) return;
+
+    const timer = window.setTimeout(() => {
+      const targetRow = document.querySelector(`[data-task-id="${highlightTaskId}"]`) as HTMLElement | null;
+      if (targetRow) {
+        targetRow.scrollIntoView({ behavior: "smooth", block: "center" });
+        targetRow.classList.add("is-highlighted");
+        window.setTimeout(() => {
+          targetRow.classList.remove("is-highlighted");
+          onHighlightHandled?.();
+        }, 2200);
+      } else {
+        onHighlightHandled?.();
+      }
+    }, 150);
+
+    return () => window.clearTimeout(timer);
+  }, [highlightTaskId, onHighlightHandled]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -364,8 +386,8 @@ export default function TaskBoard({ tasks, onTasksChange }: TaskBoardProps) {
             key={group.title}
             title={group.title}
             dotClass={group.dotClass}
-            badgeClass={group.badgeClass}
             tasks={getVisibleTasks(group.tasks)}
+            highlightTaskId={highlightTaskId ?? null}
           />
         ))}
       </div>
@@ -394,13 +416,13 @@ const formatDate = (value: string) => {
 function TaskSection({
   title,
   dotClass,
-  badgeClass,
   tasks,
+  highlightTaskId,
 }: {
   title: string;
   dotClass: string;
-  badgeClass: string;
   tasks: Task[];
+  highlightTaskId?: number | null;
 }) {
   const [open, setOpen] = useState(true);
 
@@ -441,7 +463,7 @@ function TaskSection({
 
             <tbody>
               {tasks.map((task) => (
-                <tr key={task.id} className="table-row">
+                <tr key={task.id} data-task-id={task.id} className={`table-row ${task.id === highlightTaskId ? "highlighted-task-row" : ""}`}>
                   <td className="td-cell font-semibold text-slate-800">
                     {task.task}
                   </td>

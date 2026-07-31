@@ -8,8 +8,8 @@ const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const normalizeName = (value: string) => value.trim().toLowerCase();
 
 type CalendarProps = {
-  tasks: Task[];
-  onTasksChange: (tasks: Task[]) => void;
+  tasks?: Task[];
+  onTasksChange?: (tasks: Task[]) => void;
   currentUserName?: string;
 };
 
@@ -25,8 +25,8 @@ const formatDate = (value: string) => {
 };
 
 export default function Calendar({
-  tasks,
-  onTasksChange,
+  tasks = [],
+  onTasksChange = () => undefined,
   currentUserName = "Perpaulo",
 }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());

@@ -13,6 +13,7 @@ export interface NotificationItem {
   message: string;
   time: string;
   unread?: boolean;
+  taskId?: number | null;
   iconType: "alert" | "calendar" | "check" | "bell" | "clock" | "sparkles";
 }
 
@@ -171,6 +172,7 @@ export const generateNotifications = (): NotificationItem[] => {
       message: `"${task.task}" from ${task.creator} is overdue.`,
       time: "Now",
       unread: true,
+      taskId: task.id,
       iconType: "alert",
     });
   });
@@ -184,6 +186,7 @@ export const generateNotifications = (): NotificationItem[] => {
       message: `"${task.task}" assigned by ${task.creator} is due today.`,
       time: "3 hours ago",
       unread: true,
+      taskId: task.id,
       iconType: "clock",
     });
   });
@@ -201,6 +204,7 @@ export const generateNotifications = (): NotificationItem[] => {
       title: "Upcoming task",
       message: `"${task.task}" is due in ${daysLeft} day${daysLeft > 1 ? "s" : ""}.`,
       time: `${daysLeft} day${daysLeft > 1 ? "s" : ""} away`,
+      taskId: task.id,
       iconType: "calendar",
     });
   });
@@ -214,6 +218,7 @@ export const generateNotifications = (): NotificationItem[] => {
       message: `"${task.task}" has been completed by ${task.creator}.`,
       time: "5 min ago",
       unread: true,
+      taskId: task.id,
       iconType: "check",
     });
   });

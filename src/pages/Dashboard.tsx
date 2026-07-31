@@ -27,9 +27,11 @@ import { initialTaskGroups, type Task } from "./Task_Board";
 
 type DashboardProps = {
   onLogout: () => void;
+  highlightedTaskId?: number | null;
+  onTaskHighlightHandled?: () => void;
 };
 
-export default function Dashboard({ onLogout }: DashboardProps) {
+export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlightHandled }: DashboardProps) {
   const weeklyData = [
     { day: "Mon", value: 4 },
     { day: "Tue", value: 7 },
@@ -68,6 +70,12 @@ export default function Dashboard({ onLogout }: DashboardProps) {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (highlightedTaskId !== null && highlightedTaskId !== undefined) {
+      setActiveTab("tasks");
+    }
+  }, [highlightedTaskId]);
 
   const greeting =
     currentTime.getHours() < 12
@@ -259,7 +267,12 @@ export default function Dashboard({ onLogout }: DashboardProps) {
         ) : activeTab === "calendar" ? (
           <CalendarPage tasks={tasks} onTasksChange={setTasks} currentUserName="Perpaulo" />
         ) : activeTab === "tasks" ? (
-          <TaskBoard tasks={tasks} onTasksChange={setTasks} />
+          <TaskBoard
+            tasks={tasks}
+            onTasksChange={setTasks}
+            highlightTaskId={highlightedTaskId ?? null}
+            onHighlightHandled={onTaskHighlightHandled}
+          />
         ) : activeTab === "requests" ? (
           <RequestsPage />
         ) : activeTab === "settings" ? (
@@ -420,12 +433,43 @@ export default function Dashboard({ onLogout }: DashboardProps) {
             </div>
 
             {/* BOTTOM SECTION */}
-            <div className="grid gap-6 lg:grid-cols-3">
-              <section className="lg:col-span-2 rounded-3xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
+            <div className="grid gap-6 xl:grid-cols-[1.1fr_0.95fr_1.05fr] xl:items-stretch">
+              <section className="flex h-full flex-col rounded-3xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    Upcoming Schedule
+                  </h3>
+                </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  Your next planned activities
+                </p>
+
+                <div className="mt-4 space-y-3">
+                  {upcomingSchedule.map((item) => (
+                    <div
+                      key={item.day}
+                      className="flex items-start justify-between rounded-2xl border border-slate-100 bg-slate-50/70 px-3 py-3"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800">{item.day}</p>
+                        <p className="mt-1 text-sm text-slate-500">{item.time}</p>
+                      </div>
+                      <Clock className="h-4 w-4 text-slate-400" />
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="flex h-full flex-col rounded-3xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
                 <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-slate-900">
-                    Recent Tasks
-                  </h2>
+                  <div>
+                    <h2 className="text-xl font-semibold text-slate-900">
+                      Recent Tasks
+                    </h2>
+                    <p className="mt-0.5 text-xs text-slate-500">
+                      Latest updates from your workspace
+                    </p>
+                  </div>
                   <button
                     onClick={() => setActiveTab("tasks")}
                     className="flex cursor-pointer items-center gap-1 text-xs font-semibold text-[#106fb8] hover:underline"
@@ -446,59 +490,43 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                 </div>
               </section>
 
-              <section className="flex flex-col gap-4 rounded-3xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
-                <div>
-                  <h2 className="mb-4 text-lg font-bold text-slate-900">
-                    Team Overview
-                  </h2>
-
-                  <div className="space-y-4">
-                    {teamMembers.map((member) => (
-                      <div key={member.name} className="space-y-1.5">
-                        <div className="flex justify-between text-xs font-semibold">
-                          <span className="text-slate-800">
-                            {member.name}{" "}
-                            <span className="font-normal text-slate-400">
-                              ({member.role})
-                            </span>
-                          </span>
-                          <span className="text-[#106fb8]">
-                            {member.progress}
-                          </span>
-                        </div>
-                        <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 p-0.5">
-                          <div
-                            className="h-full rounded-full bg-[#106fb8] transition-all duration-500"
-                            style={{ width: member.progress }}
-                          />
-                        </div>
-                      </div>
-                    ))}
+              <section className="flex h-full flex-col rounded-3xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.06)] xl:ml-auto xl:w-full">
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">
+                      Team Overview
+                    </h2>
+                    <p className="mt-0.5 text-xs text-slate-500">
+                      Individual progress across the team
+                    </p>
+                  </div>
+                  <div className="rounded-full bg-[#106fb8]/10 px-3 py-1 text-xs font-semibold text-[#106fb8]">
+                    4 members
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
-                  <div className="flex items-center gap-2">
-                    <CalendarDays className="h-5 w-5 text-[#106fb8]" />
-                    <h3 className="text-sm font-semibold text-slate-900">
-                      Upcoming Schedule
-                    </h3>
-                  </div>
-
-                  <div className="mt-4 space-y-3">
-                    {upcomingSchedule.map((item) => (
-                      <div
-                        key={item.day}
-                        className="flex items-start justify-between rounded-2xl border border-slate-100 bg-white px-3 py-3"
-                      >
-                        <div>
-                          <p className="text-sm font-semibold text-slate-800">{item.day}</p>
-                          <p className="mt-1 text-sm text-slate-500">{item.time}</p>
-                        </div>
-                        <Clock className="h-4 w-4 text-slate-400" />
+                <div className="space-y-4">
+                  {teamMembers.map((member) => (
+                    <div key={member.name} className="space-y-1.5">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span className="text-slate-800">
+                          {member.name}{" "}
+                          <span className="font-normal text-slate-400">
+                            ({member.role})
+                          </span>
+                        </span>
+                        <span className="text-[#106fb8]">
+                          {member.progress}
+                        </span>
                       </div>
-                    ))}
-                  </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 p-0.5">
+                        <div
+                          className="h-full rounded-full bg-[#106fb8] transition-all duration-500"
+                          style={{ width: member.progress }}
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </section>
             </div>

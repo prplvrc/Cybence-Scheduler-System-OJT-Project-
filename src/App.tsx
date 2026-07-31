@@ -15,6 +15,7 @@ function App() {
   >("login");
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isInboxOpen, setIsInboxOpen] = useState(false);
+  const [highlightedTaskId, setHighlightedTaskId] = useState<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -36,6 +37,7 @@ function App() {
     setCurrentPage("login");
     setIsNotificationOpen(false);
     setIsInboxOpen(false);
+    setHighlightedTaskId(null);
   };
 
   const closeDropdowns = () => {
@@ -60,7 +62,13 @@ function App() {
 
   const renderCurrentPage = () => {
     if (currentPage === "dashboard") {
-      return <Dashboard onLogout={handleLogout} />;
+      return (
+        <Dashboard
+          onLogout={handleLogout}
+          highlightedTaskId={highlightedTaskId}
+          onTaskHighlightHandled={() => setHighlightedTaskId(null)}
+        />
+      );
     }
 
     if (currentPage === "calendar") {
@@ -104,7 +112,16 @@ function App() {
 
           {isInboxOpen && (
             <div className="absolute right-0 top-14 w-[min(360px,calc(100vw-2rem))]">
-              <InboxPanel isOpen={isInboxOpen} onClose={() => setIsInboxOpen(false)} />
+              <InboxPanel
+                isOpen={isInboxOpen}
+                onClose={() => setIsInboxOpen(false)}
+                onSelectInboxItem={(taskId) => {
+                  setHighlightedTaskId(taskId);
+                  setCurrentPage("dashboard");
+                  setIsNotificationOpen(false);
+                  setIsInboxOpen(false);
+                }}
+              />
             </div>
           )}
 
@@ -113,6 +130,12 @@ function App() {
               <NotificationPanel
                 isOpen={isNotificationOpen}
                 onClose={() => setIsNotificationOpen(false)}
+                onSelectNotification={(taskId) => {
+                  setHighlightedTaskId(taskId);
+                  setCurrentPage("dashboard");
+                  setIsNotificationOpen(false);
+                  setIsInboxOpen(false);
+                }}
               />
             </div>
           )}
