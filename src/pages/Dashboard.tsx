@@ -3,7 +3,6 @@ import {
   LayoutDashboard,
   CheckSquare,
   Calendar as CalendarIcon,
-  CalendarDays,
   FileText,
   Settings,
   User,
