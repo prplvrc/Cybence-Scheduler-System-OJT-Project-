@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import {
-  Calendar,
-  Clock,
   ChevronDown,
   ChevronRight,
   Eye,
@@ -170,12 +168,8 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
 
   const taskGroups = buildTaskGroups(tasks);
 
-<<<<<<< Updated upstream
   // Handle task creation submission from the modal
   const handleCreateTask = (taskData: NewTaskFormData) => {
-=======
-  const handleCreateTask = (taskData: any) => {
->>>>>>> Stashed changes
     const newTask: Task = {
       id: Date.now(),
       task: taskData.title,
