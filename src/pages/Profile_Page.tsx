@@ -7,7 +7,9 @@ import {
   Phone,
   ShieldCheck,
   Sparkles,
-  ArrowLeft,
+  Save,
+  X,
+  Camera,
 } from "lucide-react";
 
 type ProfileFormState = {
@@ -20,11 +22,11 @@ type ProfileFormState = {
 };
 
 const initialProfile: ProfileFormState = {
-  name: "Perpaulo Varca",
+  name: "Daniel Sardalla",
   title: "Intern • Cybence Operations",
   about:
-    "Maria is responsible for organizing schedules, ensuring smooth coordination across teams, and maintaining reliable communication with clients. She enjoys creating order out of busy workflows and helping others stay on track.",
-  email: "perpaulo.varca@cybence.com",
+    "Daniel is responsible for organizing schedules, ensuring smooth coordination across teams, and maintaining reliable communication with clients. He enjoys creating order out of busy workflows and helping others stay on track.",
+  email: "daniel.sardalla@cybence.com",
   phone: "+63 912 345 6789",
   department: "Operations & Scheduling",
 };
@@ -35,11 +37,7 @@ const stats = [
   { label: "Upcoming Tasks", value: "4" },
 ];
 
-type ProfilePageProps = {
-  onBackToDashboard?: () => void;
-};
-
-export default function ProfilePage({ onBackToDashboard }: ProfilePageProps) {
+export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState<ProfileFormState>(initialProfile);
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -85,125 +83,121 @@ export default function ProfilePage({ onBackToDashboard }: ProfilePageProps) {
   };
 
   return (
-    <div className="page-surface relative min-h-screen overflow-x-hidden">
+    <div className="w-full min-h-[calc(100vh-32px)] p-6 sm:p-8 flex flex-col font-sans text-slate-800">
+      
+      {/* Main Profile Content Container */}
+      <div className="flex-1 space-y-6">
+        
+        {/* User Identity Banner Card (With Edit Button Moved Inside) */}
+        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#106fb8] to-sky-400" />
 
-      <div className="relative mx-auto max-w-6xl space-y-6 pb-1">
-        {/* Profile Header */}
-        <section className="relative overflow-hidden rounded-4xl border border-white/80 bg-white/85 p-8 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
-          <div className="absolute left-0 top-0 h-1 w-full bg-linear-to-r from-sky-400 to-[#106fb8]" />
-
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-              <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-[#106fb8]/10 bg-[#106fb8]/10 text-3xl font-bold text-[#106fb8]">
-                {profileImage ? (
-                  <img src={profileImage} alt="Profile preview" className="h-full w-full object-cover" />
-                ) : (
-                  initials
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            
+            {/* Left side: Avatar and Basic Details */}
+            <div className="flex items-center gap-5">
+              <div className="relative group">
+                <div className="w-20 h-20 rounded-2xl bg-blue-50 border border-blue-100 text-[#106fb8] flex items-center justify-center font-bold text-2xl overflow-hidden shadow-sm">
+                  {profileImage ? (
+                    <img src={profileImage} alt="Profile preview" className="w-full h-full object-cover" />
+                  ) : (
+                    initials
+                  )}
+                </div>
+                {isEditing && (
+                  <label className="absolute -bottom-2 -right-2 p-1.5 bg-[#106fb8] text-white rounded-lg shadow-md cursor-pointer hover:bg-[#0d5ca0] transition">
+                    <Camera className="w-3.5 h-3.5" />
+                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                  </label>
                 )}
               </div>
 
-              <div>
+              <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   {isEditing ? (
                     <input
                       value={profileData.name}
                       onChange={(event) => handleFieldChange("name", event.target.value)}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-[1.9rem] font-bold tracking-tight text-slate-900 outline-none focus:border-[#106fb8]"
+                      className="rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-1.5 text-xl font-bold text-slate-900 outline-none focus:border-[#106fb8] focus:bg-white"
                     />
                   ) : (
-                    <h1 className="text-[1.9rem] sm:text-[2.1rem] font-bold tracking-tight text-slate-900">
+                    <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
                       {profileData.name}
-                    </h1>
+                      <BadgeCheck className="w-5 h-5 text-[#106fb8]" />
+                    </h2>
                   )}
-                  <BadgeCheck className="h-5 w-5 text-[#106fb8]" />
                 </div>
 
                 {isEditing ? (
                   <input
                     value={profileData.title}
                     onChange={(event) => handleFieldChange("title", event.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600 outline-none focus:border-[#106fb8]"
+                    className="rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-1 text-sm font-medium text-slate-600 outline-none focus:border-[#106fb8] focus:bg-white"
                   />
                 ) : (
-                  <p className="mt-2 text-sm font-medium text-slate-500">{profileData.title}</p>
+                  <p className="text-sm font-medium text-slate-500">{profileData.title}</p>
                 )}
 
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <span className="rounded-full bg-[#106fb8]/10 px-3 py-1 text-xs font-semibold text-[#106fb8]">
+                <div className="flex items-center gap-2 pt-1">
+                  <span className="rounded-full bg-blue-50 border border-blue-100 px-3 py-0.5 text-xs font-semibold text-[#106fb8]">
                     Active
                   </span>
-
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                  <span className="rounded-full bg-slate-100 px-3 py-0.5 text-xs font-semibold text-slate-600">
                     Available for support
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              {onBackToDashboard ? (
-                <button
-                  type="button"
-                  onClick={onBackToDashboard}
-                  className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50"
-                >
-                  <ArrowLeft size={16} />
-                  Back to dashboard
-                </button>
-              ) : null}
+            {/* Right side: Action Buttons */}
+            <div className="flex items-center gap-3">
               {isEditing ? (
                 <>
                   <button
                     type="button"
-                    onClick={handleSave}
-                    className="rounded-2xl bg-[#106fb8] px-4 py-3 font-semibold text-white shadow-sm transition-all hover:bg-[#0d5b97]"
+                    onClick={handleCancel}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                   >
-                    Save Changes
+                    <X className="w-4 h-4" />
+                    Cancel
                   </button>
                   <button
                     type="button"
-                    onClick={handleCancel}
-                    className="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50"
+                    onClick={handleSave}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#106fb8] px-5 py-2 text-sm font-semibold text-white shadow-sm shadow-[#106fb8]/30 hover:bg-[#0d5ca0] transition cursor-pointer"
                   >
-                    Cancel
+                    <Save className="w-4 h-4" />
+                    Save Changes
                   </button>
                 </>
               ) : (
                 <button
                   type="button"
                   onClick={() => setIsEditing(true)}
-                  className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:shadow-md cursor-pointer"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50 transition cursor-pointer"
                 >
-                  <Edit3 size={16} />
+                  <Edit3 className="w-4 h-4 text-[#106fb8]" />
                   Edit Profile
                 </button>
               )}
             </div>
+
           </div>
+        </div>
 
-          {isEditing ? (
-            <label className="mt-4 inline-flex w-fit cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-[#106fb8]/40 bg-sky-50 px-4 py-3 text-sm font-semibold text-[#106fb8] transition-all hover:bg-sky-100">
-              <Edit3 className="h-4 w-4" />
-              Upload Profile Picture
-              <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-            </label>
-          ) : null}
-        </section>
-
-        {/* Balanced Grid Container */}
-        <div className="grid gap-6 lg:grid-cols-2 items-start">
-          {/* Left Column */}
-          <div className="space-y-6 flex flex-col">
-            {/* About */}
-            <section className="rounded-4xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
-              <div className="flex items-center justify-between">
+        {/* 2-Column Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* LEFT: About & Contact Information (8 Columns) */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* About Me */}
+            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">About Me</h2>
-                  <p className="mt-1 text-sm text-slate-500">Professional overview and account details</p>
+                  <h3 className="text-base font-bold text-slate-800">About Me</h3>
+                  <p className="text-xs text-slate-500">Professional overview and account summary.</p>
                 </div>
-
-                <div className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
-                  <ShieldCheck className="h-4 w-4" />
+                <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-100">
+                  <ShieldCheck className="w-3.5 h-3.5" />
                   Verified
                 </div>
               </div>
@@ -212,19 +206,22 @@ export default function ProfilePage({ onBackToDashboard }: ProfilePageProps) {
                 <textarea
                   value={profileData.about}
                   onChange={(event) => handleFieldChange("about", event.target.value)}
-                  rows={5}
-                  className="mt-5 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-7 text-slate-600 outline-none focus:border-[#106fb8]"
+                  rows={4}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3.5 text-sm leading-relaxed text-slate-700 outline-none focus:border-[#106fb8] focus:bg-white transition resize-none"
                 />
               ) : (
-                <p className="mt-5 text-sm leading-7 text-slate-600">{profileData.about}</p>
+                <p className="text-sm leading-relaxed text-slate-600">{profileData.about}</p>
               )}
-            </section>
+            </div>
 
             {/* Contact Information */}
-            <section className="rounded-4xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
-              <h2 className="text-lg font-semibold text-slate-900">Contact Information</h2>
+            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-4">
+              <div className="border-b border-slate-100 pb-3">
+                <h3 className="text-base font-bold text-slate-800">Contact Information</h3>
+                <p className="text-xs text-slate-500">Communication details and organizational team.</p>
+              </div>
 
-              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
                   { label: "Email", value: profileData.email, icon: Mail, field: "email" as const },
                   { label: "Phone", value: profileData.phone, icon: Phone, field: "phone" as const },
@@ -235,10 +232,10 @@ export default function ProfilePage({ onBackToDashboard }: ProfilePageProps) {
                   return (
                     <div
                       key={item.label}
-                      className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all hover:border-[#106fb8]/20 hover:bg-white"
+                      className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 space-y-1.5"
                     >
-                      <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                        <Icon className="h-4 w-4 text-[#106fb8]" />
+                      <div className="flex items-center gap-2 text-xs font-semibold text-slate-700">
+                        <Icon className="w-3.5 h-3.5 text-[#106fb8]" />
                         {item.label}
                       </div>
 
@@ -246,44 +243,41 @@ export default function ProfilePage({ onBackToDashboard }: ProfilePageProps) {
                         <input
                           value={item.value}
                           onChange={(event) => handleFieldChange(item.field, event.target.value)}
-                          className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:border-[#106fb8]"
+                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 outline-none focus:border-[#106fb8]"
                         />
                       ) : (
-                        <p className="mt-2 text-sm text-slate-600 truncate">{item.value}</p>
+                        <p className="text-sm font-medium text-slate-800 truncate">{item.value}</p>
                       )}
                     </div>
                   );
                 })}
               </div>
-            </section>
+            </div>
           </div>
 
-          {/* Right Column */}
-          <div className="space-y-6 flex flex-col">
-            {/* Stats */}
-            <section className="rounded-4xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-900">Performance Snapshot</h2>
-
-                <Sparkles className="h-5 w-5 text-[#106fb8]" />
+          {/* RIGHT: Performance Snapshot Sidebar (4 Columns) */}
+          <div className="lg:col-span-4 space-y-6">
+            <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="text-base font-bold text-slate-800">Performance Snapshot</h3>
+                <Sparkles className="w-4 h-4 text-[#106fb8]" />
               </div>
 
-              <div className="mt-5 space-y-3">
+              <div className="space-y-3">
                 {stats.map((stat) => (
                   <div
                     key={stat.label}
-                    className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/50 px-4 py-3"
+                    className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/50"
                   >
-                    <span className="text-sm text-slate-500">{stat.label}</span>
-
-                    <span className="text-lg font-bold text-slate-900">{stat.value}</span>
+                    <span className="text-xs font-semibold text-slate-500">{stat.label}</span>
+                    <span className="text-base font-extrabold text-slate-900">{stat.value}</span>
                   </div>
                 ))}
               </div>
-            </section>
-
+            </div>
           </div>
         </div>
+
       </div>
     </div>
   );

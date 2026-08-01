@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   ChevronDown,
   ChevronRight,
   Eye,
   Search,
+  SlidersHorizontal,
+  X,
 } from "lucide-react";
 import NewTaskModal from "./New_Task";
 import type { NewTaskFormData } from "./New_Task";
@@ -27,12 +29,22 @@ export interface TaskGroup {
   tasks: Task[];
 }
 
+export interface FilterState {
+  search: string;
+  priorities: string[];
+  statuses: string[];
+  sort: "asc" | "desc";
+}
+
 type TaskBoardProps = {
   tasks: Task[];
   onTasksChange: (tasks: Task[]) => void;
   highlightTaskId?: number | null;
   onHighlightHandled?: () => void;
 };
+
+const PRIORITIES = ["Low", "Medium", "High", "Critical"];
+const STATUSES = ["To Be Assigned", "To Do", "Ongoing", "Completed", "Unfinished"];
 
 const buildTaskGroups = (tasks: Task[]): TaskGroup[] => {
   const groupMap: Record<string, TaskGroup> = {
@@ -91,8 +103,13 @@ const buildTaskGroups = (tasks: Task[]): TaskGroup[] => {
 };
 
 export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHighlightHandled }: TaskBoardProps) {
-  const [search, setSearch] = useState("");
-  const [filterMode, setFilterMode] = useState<string>("default");
+  const [filter, setFilter] = useState<FilterState>({
+    search: "",
+    priorities: [],
+    statuses: [],
+    sort: "desc",
+  });
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -137,38 +154,45 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
     second: "2-digit",
   });
 
-  const getVisibleTasks = (tasks: Task[]) => {
-    const normalizedSearch = search.toLowerCase();
+  // Check if any filter or custom sort is active
+  const hasActiveFilters =
+    filter.priorities.length > 0 || filter.statuses.length > 0 || filter.sort !== "desc";
 
-    const filteredTasks = tasks.filter((task) => {
-      const matchesSearch = task.task.toLowerCase().includes(normalizedSearch);
+  // Filter and sort tasks dynamically
+  const filteredTasks = useMemo(() => {
+    let result = [...tasks];
 
-      if (filterMode.startsWith("priority-")) {
-        const targetPriority = filterMode.replace("priority-", "");
-        return matchesSearch && task.priority.toLowerCase() === targetPriority;
-      }
+    if (filter.search.trim()) {
+      const q = filter.search.toLowerCase();
+      result = result.filter(
+        (t) =>
+          t.task.toLowerCase().includes(q) ||
+          t.creator.toLowerCase().includes(q) ||
+          t.assignedTo.toLowerCase().includes(q)
+      );
+    }
 
-      return matchesSearch;
+    if (filter.priorities.length > 0) {
+      result = result.filter((t) =>
+        filter.priorities.some((p) => p.toLowerCase() === t.priority.toLowerCase())
+      );
+    }
+
+    if (filter.statuses.length > 0) {
+      result = result.filter((t) => filter.statuses.includes(t.status));
+    }
+
+    result.sort((a, b) => {
+      const timeA = new Date(a.createdOn).getTime();
+      const timeB = new Date(b.createdOn).getTime();
+      return filter.sort === "asc" ? timeA - timeB : timeB - timeA;
     });
 
-    if (filterMode === "date-newest") {
-      return [...filteredTasks].sort(
-        (a, b) => new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime()
-      );
-    }
+    return result;
+  }, [tasks, filter]);
 
-    if (filterMode === "date-oldest") {
-      return [...filteredTasks].sort(
-        (a, b) => new Date(a.createdOn).getTime() - new Date(b.createdOn).getTime()
-      );
-    }
+  const taskGroups = buildTaskGroups(filteredTasks);
 
-    return filteredTasks;
-  };
-
-  const taskGroups = buildTaskGroups(tasks);
-
-  // Handle task creation submission from the modal
   const handleCreateTask = (taskData: NewTaskFormData) => {
     const newTask: Task = {
       id: Date.now(),
@@ -210,38 +234,49 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
         </div>
       </header>
 
-      {/* Clean Toolbar Section */}
+      {/* Toolbar Section */}
       <div className="toolbar-section">
+        <div className="filter-controls">
+          <button
+            type="button"
+            onClick={() => setShowFilterModal(true)}
+            className={`btn-filter ${hasActiveFilters ? "is-active" : ""}`}
+          >
+            <SlidersHorizontal size={15} />
+            <span>Filters</span>
+            
+            {hasActiveFilters && (
+              <span
+                role="button"
+                tabIndex={0}
+                title="Clear filters"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFilter({ search: filter.search, priorities: [], statuses: [], sort: "desc" });
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.stopPropagation();
+                    setFilter({ search: filter.search, priorities: [], statuses: [], sort: "desc" });
+                  }
+                }}
+                className="clear-filter-icon"
+              >
+                <X size={14} />
+              </span>
+            )}
+          </button>
+        </div>
+
         <div className="search-box">
           <Search size={16} className="search-icon" />
           <input
             type="text"
             placeholder="Search tasks..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={filter.search}
+            onChange={(e) => setFilter((f) => ({ ...f, search: e.target.value }))}
           />
         </div>
-
-        {/* Consolidated Single Filter & Sort Dropdown */}
-        <select
-          className="sort-select"
-          value={filterMode}
-          onChange={(e) => setFilterMode(e.target.value)}
-        >
-          <option value="default">All Tasks (Default)</option>
-
-          <optgroup label="Sort by Date">
-            <option value="date-newest">Newest to oldest</option>
-            <option value="date-oldest">Oldest to newest</option>
-          </optgroup>
-
-          <optgroup label="Filter by Priority">
-            <option value="priority-low">Low Priority</option>
-            <option value="priority-medium">Medium Priority</option>
-            <option value="priority-high">High Priority</option>
-            <option value="priority-critical">Critical Priority</option>
-          </optgroup>
-        </select>
       </div>
 
       {/* Accordion List Sections */}
@@ -251,11 +286,20 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
             key={group.title}
             title={group.title}
             dotClass={group.dotClass}
-            tasks={getVisibleTasks(group.tasks)}
+            tasks={group.tasks}
             highlightTaskId={highlightTaskId ?? null}
           />
         ))}
       </div>
+
+      {/* Filter Modal Overlay */}
+      {showFilterModal && (
+        <FilterModal
+          filter={filter}
+          onChange={(newFilter) => setFilter(newFilter)}
+          onClose={() => setShowFilterModal(false)}
+        />
+      )}
 
       {/* New Task Modal Popup */}
       <NewTaskModal
@@ -278,6 +322,129 @@ const formatDate = (value: string) => {
   });
 };
 
+function FilterModal({
+  filter,
+  onChange,
+  onClose,
+}: {
+  filter: FilterState;
+  onChange: (f: FilterState) => void;
+  onClose: () => void;
+}) {
+  const [local, setLocal] = useState<FilterState>(filter);
+
+  const togglePriority = (p: string) =>
+    setLocal((f) => ({
+      ...f,
+      priorities: f.priorities.includes(p)
+        ? f.priorities.filter((x) => x !== p)
+        : [...f.priorities, p],
+    }));
+
+  const toggleStatus = (s: string) =>
+    setLocal((f) => ({
+      ...f,
+      statuses: f.statuses.includes(s)
+        ? f.statuses.filter((x) => x !== s)
+        : [...f.statuses, s],
+    }));
+
+  return (
+    <div className="filter-modal-overlay">
+      <div className="filter-modal-card">
+        <div className="filter-modal-header">
+          <h3>Filter &amp; Sort Tasks</h3>
+          <button type="button" onClick={onClose} className="btn-close-modal">
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="filter-modal-body">
+          {/* Priority Filter */}
+          <div className="filter-group">
+            <label className="filter-label">Priority</label>
+            <div className="filter-chip-row">
+              {PRIORITIES.map((p) => {
+                const active = local.priorities.includes(p);
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => togglePriority(p)}
+                    className={`filter-chip ${active ? "chip-active" : ""}`}
+                  >
+                    {p}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Status Filter */}
+          <div className="filter-group">
+            <label className="filter-label">Status</label>
+            <div className="filter-chip-row">
+              {STATUSES.map((s) => {
+                const active = local.statuses.includes(s);
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => toggleStatus(s)}
+                    className={`filter-chip ${active ? "chip-active" : ""}`}
+                  >
+                    {s}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Sort Direction */}
+          <div className="filter-group">
+            <label className="filter-label">Sort by Created Date</label>
+            <div className="filter-toggle-row">
+              {(["desc", "asc"] as const).map((dir) => (
+                <button
+                  key={dir}
+                  type="button"
+                  onClick={() => setLocal((f) => ({ ...f, sort: dir }))}
+                  className={`filter-toggle-btn ${local.sort === dir ? "toggle-active" : ""}`}
+                >
+                  {dir === "desc" ? "Newest first" : "Oldest first"}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="filter-modal-actions">
+          <button
+            type="button"
+            className="btn-reset"
+            onClick={() =>
+              setLocal({ search: filter.search, priorities: [], statuses: [], sort: "desc" })
+            }
+          >
+            Reset
+          </button>
+          <button
+            type="button"
+            className="btn-apply"
+            onClick={() => {
+              onChange(local);
+              onClose();
+            }}
+          >
+            Apply Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TaskSection({
   title,
   dotClass,
@@ -293,7 +460,6 @@ function TaskSection({
 
   return (
     <div className="task-group-card">
-      {/* Section Toggle Bar */}
       <button
         onClick={() => setOpen(!open)}
         className="group-header-btn"
@@ -311,7 +477,6 @@ function TaskSection({
         <span className="group-count">{tasks.length}</span>
       </button>
 
-      {/* Expandable Table Area */}
       {open && (
         <div className="table-wrapper">
           <table className="task-table">

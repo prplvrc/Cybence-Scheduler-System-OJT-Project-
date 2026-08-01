@@ -8,7 +8,6 @@ import {
   User,
   LogOut,
   Clock,
-  Plus,
   ArrowRight,
   TrendingUp,
   ListTodo,
@@ -71,12 +70,6 @@ export default function Dashboard({
       date: "2026-07-19",
       status: "To Do",
     },
-  ];
-
-  const upcomingSchedule = [
-    { day: "Today", time: "09:00 AM - Team Sync" },
-    { day: "Tomorrow", time: "02:00 PM - Client Review" },
-    { day: "Friday", time: "11:30 AM - Training Session" },
   ];
 
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -153,7 +146,7 @@ export default function Dashboard({
                 className="h-10 w-10 shrink-0 rounded-xl object-contain"
               />
               <div className="min-w-0 flex-1 overflow-hidden">
-                <h1 className="text-xl font-bold leading-none tracking-[0.42em] text-[#106fb8] truncate">
+                <h1 className="text-xl font-bold leading-none tracking-[0.52em] text-[#106fb8] truncate">
                   CYBENCE
                 </h1>
                 <p className="mt-1 truncate text-[10px] text-slate-500">
@@ -262,11 +255,11 @@ export default function Dashboard({
           className="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 p-3.5 transition-colors hover:bg-slate-100/80"
         >
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#106fb8]/10 text-sm font-bold text-[#106fb8]">
-            PV
+            DS
           </div>
           <div className="overflow-hidden">
             <p className="truncate text-sm font-semibold text-slate-800">
-              Perpaulo Varca
+              Daniel Sardalla
             </p>
             <p className="truncate text-xs text-slate-500">Intern • Active</p>
           </div>
@@ -282,7 +275,11 @@ export default function Dashboard({
         {activeTab === "profile" ? (
           <ProfilePage onBackToDashboard={() => setActiveTab("dashboard")} />
         ) : activeTab === "calendar" ? (
-          <CalendarPage tasks={tasks} onTasksChange={setTasks} currentUserName="Perpaulo" />
+          <CalendarPage
+            tasks={tasks}
+            onTasksChange={setTasks}
+            currentUserName="Perpaulo"
+          />
         ) : activeTab === "tasks" ? (
           <TaskBoard
             tasks={tasks}
@@ -313,7 +310,7 @@ export default function Dashboard({
                   </button>
                   <div>
                     <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-                      {greeting}, Perpaulo! 👋
+                      {greeting}, Daniel! 👋
                     </h1>
                     <p className="text-sm text-slate-500 font-medium">
                       Here is what's happening with your workspace today.
@@ -321,7 +318,7 @@ export default function Dashboard({
                   </div>
                 </div>
 
-                {/* RIGHT SIDE: Date & Time + Action Buttons */}
+                {/* RIGHT SIDE: Date & Time */}
                 <div className="flex items-center gap-4">
                   <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-500">
                     <span className="flex items-center gap-1.5">
@@ -333,9 +330,6 @@ export default function Dashboard({
                       {formattedTime}
                     </span>
                   </div>
-
-                  {/* ACTION BUTTONS */}
-                  {/* If you add buttons here later, they will sit right beside the time */}
                 </div>
               </div>
             </section>
@@ -450,38 +444,8 @@ export default function Dashboard({
               </section>
             </div>
 
-            {/* BOTTOM SECTION */}
-            <div className="grid gap-6 xl:grid-cols-[1.1fr_0.95fr_1.05fr] xl:items-stretch">
-              <section className="flex h-full flex-col rounded-3xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-900">
-                    Upcoming Schedule
-                  </h3>
-                </div>
-                <p className="mt-1 text-xs text-slate-500">
-                  Your next planned activities
-                </p>
-
-                <div className="mt-4 space-y-3">
-                  {upcomingSchedule.map((item) => (
-                    <div
-                      key={item.day}
-                      className="flex items-start justify-between rounded-2xl border border-slate-100 bg-slate-50/70 px-3 py-3"
-                    >
-                      <div>
-                        <p className="text-sm font-semibold text-slate-800">
-                          {item.day}
-                        </p>
-                        <p className="mt-1 text-sm text-slate-500">
-                          {item.time}
-                        </p>
-                      </div>
-                      <Clock className="h-4 w-4 text-slate-400" />
-                    </div>
-                  ))}
-                </div>
-              </section>
-
+            {/* BOTTOM SECTION: RECENT TASKS & TEAM OVERVIEW */}
+            <div className="grid gap-6 lg:grid-cols-2">
               <section className="flex h-full flex-col rounded-3xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
@@ -512,7 +476,7 @@ export default function Dashboard({
                 </div>
               </section>
 
-              <section className="flex h-full flex-col rounded-3xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.06)] xl:ml-auto xl:w-full">
+              <section className="flex h-full flex-col rounded-3xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <h2 className="text-lg font-bold text-slate-900">
@@ -565,7 +529,6 @@ export default function Dashboard({
           setIsNewTaskOpen(false);
         }}
       />
-
     </div>
   );
 }

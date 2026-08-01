@@ -1,4 +1,5 @@
 ﻿import { useState } from "react";
+import { Plus, Clock, Calendar as Filter } from "lucide-react";
 import "./Calendar.css";
 import NewTaskModal from "./New_Task";
 import type { NewTaskFormData } from "./New_Task";
@@ -33,6 +34,13 @@ export default function Calendar({
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(new Date().getDate());
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<string>("All");
+
+  const upcomingSchedule = [
+    { day: "Today", time: "09:00 AM - Team Sync" },
+    { day: "Tomorrow", time: "02:00 PM - Client Review" },
+    { day: "Friday", time: "11:30 AM - Training Session" },
+  ];
 
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
@@ -40,10 +48,7 @@ export default function Calendar({
   const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-  const monthName = currentDate.toLocaleString("default", {
-    month: "long",
-  });
-
+  const monthName = currentDate.toLocaleString("default", { month: "long" });
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const emptyOffset = Array.from({ length: firstDayOfMonth });
   const today = new Date();
@@ -66,15 +71,16 @@ export default function Calendar({
 
   const ownerTasks = tasks.filter((task) => {
     if (!task.dueDate) return false;
-
     const dueDate = new Date(task.dueDate);
     if (Number.isNaN(dueDate.getTime())) return false;
 
-    return (
+    const isUserTask =
       normalizeName(task.assignedTo) === normalizeName(currentUserName) &&
       dueDate.getMonth() === currentMonth &&
-      dueDate.getFullYear() === currentYear
-    );
+      dueDate.getFullYear() === currentYear;
+
+    if (activeFilter === "All") return isUserTask;
+    return isUserTask && task.status === activeFilter;
   });
 
   const selectedDayTasks = ownerTasks.filter((task) => {
@@ -82,14 +88,20 @@ export default function Calendar({
     return dueDate.getDate() === selectedDay;
   });
 
-  const taskDaysWithOwnerTasks = new Set(ownerTasks.map((task) => new Date(task.dueDate).getDate()));
+  // Calculate Monthly Stats
+  const totalMonthTasks = ownerTasks.length;
+  const completedMonthTasks = ownerTasks.filter((t) => t.status === "Completed").length;
+  const completionPercentage = totalMonthTasks > 0 ? Math.round((completedMonthTasks / totalMonthTasks) * 100) : 0;
 
   const handleCreateTask = (taskData: NewTaskFormData) => {
     const newTask: Task = {
       id: Date.now(),
       task: taskData.title,
       creator: "You",
-      assignedTo: taskData.assignTo === "Open for anyone to take" ? "Open" : taskData.assignTo,
+      assignedTo:
+        taskData.assignTo === "Open for anyone to take"
+          ? "Open"
+          : taskData.assignTo,
       createdOn: new Date().toISOString().split("T")[0],
       status: taskData.status || "Pending",
       dueDate: taskData.dueDate || new Date().toISOString().split("T")[0],
@@ -111,34 +123,18 @@ export default function Calendar({
           </p>
         </div>
 
-        <div className="header-right">
-          <div className="timestamp-badge">
-            <span className="date-str">
-              {today.toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </span>
-
-            <span className="dot">•</span>
-
-            <span className="time-str">
-              {today.toLocaleTimeString()}
-            </span>
-          </div>
-
-          <button 
-            className="btn-primary"
-            onClick={() => setIsModalOpen(true)}
-          >
-            + New Task
-          </button>
-        </div>
+        <button
+          className="btn-primary flex items-center gap-2 cursor-pointer"
+          onClick={() => setIsModalOpen(true)}
+        >
+          <Plus size={16} />
+          Add New Event
+        </button>
       </header>
 
-      {/* CALENDAR GRID */}
-      <div className="calendar-grid">
+      {/* 2-COLUMN MAIN LAYOUT */}
+      <div className="calendar-main-layout">
+        {/* LEFT COLUMN: EXPANDED FULL-HEIGHT CALENDAR */}
         <div className="calendar-card">
           <div className="month-header">
             <h2>
@@ -154,10 +150,7 @@ export default function Calendar({
                 &lt;
               </button>
 
-              <button
-                className="nav-btn today-btn"
-                onClick={handleToday}
-              >
+              <button className="nav-btn today-btn" onClick={handleToday}>
                 Today
               </button>
 
@@ -171,25 +164,19 @@ export default function Calendar({
             </div>
           </div>
 
-          {/* WEEKDAY LABELS */}
+          {/* WEEKDAYS HEADER */}
           <div className="weekdays-row">
             {weekdays.map((day) => (
-              <div
-                key={day}
-                className="weekday-label"
-              >
+              <div key={day} className="weekday-label">
                 {day}
               </div>
             ))}
           </div>
 
-          {/* DAYS GRID */}
+          {/* EXPANDED DAYS GRID */}
           <div className="days-grid">
             {emptyOffset.map((_, index) => (
-              <div
-                key={`offset-${index}`}
-                className="day-cell offset"
-              />
+              <div key={`offset-${index}`} className="day-cell offset" />
             ))}
 
             {daysArray.map((day) => {
@@ -198,80 +185,170 @@ export default function Calendar({
                 currentMonth === today.getMonth() &&
                 currentYear === today.getFullYear();
 
-              const isSelected =
-                day === selectedDay;
+              const isSelected = day === selectedDay;
+
+              const dayTasks = ownerTasks.filter(
+                (t) => new Date(t.dueDate).getDate() === day
+              );
 
               return (
                 <button
                   key={day}
-                  onClick={() =>
-                    setSelectedDay(day)
-                  }
-                  className={`day-cell ${
-                    isToday ? "is-today" : ""
-                  } ${
-                    isSelected
-                      ? "is-selected"
-                      : ""
+                  type="button"
+                  onClick={() => setSelectedDay(day)}
+                  className={`day-cell ${isToday ? "is-today" : ""} ${
+                    isSelected ? "is-selected" : ""
                   }`}
                 >
-                  <span className="day-number">
-                    {day}
-                  </span>
+                  <span className="day-number">{day}</span>
 
-                  {taskDaysWithOwnerTasks.has(day) && (
-                    <span className="task-indicator" />
-                  )}
+                  <div className="cell-task-list">
+                    {dayTasks.slice(0, 2).map((t) => (
+                      <span
+                        key={t.id}
+                        className={`mini-task-pill ${
+                          t.status === "Completed" ? "pill-done" : "pill-pending"
+                        }`}
+                      >
+                        {t.task}
+                      </span>
+                    ))}
+                    {dayTasks.length > 2 && (
+                      <span className="more-pill">+{dayTasks.length - 2} more</span>
+                    )}
+                  </div>
                 </button>
               );
             })}
           </div>
+
+          {/* BOTTOM FILTER & LEGEND BAR */}
+          <div className="calendar-legend-bar">
+            <div className="legend-group">
+              <span className="legend-title">
+                <Filter size={13} /> Filter View:
+              </span>
+              {["All", "Pending", "Completed"].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setActiveFilter(status)}
+                  className={`filter-chip ${
+                    activeFilter === status ? "chip-active" : ""
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
+
+            <div className="legend-status-dots">
+              <span className="status-dot-item">
+                <span className="dot dot-pending" /> Pending
+              </span>
+              <span className="status-dot-item">
+                <span className="dot dot-done" /> Completed
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* TASKS PANEL */}
-        <aside className="tasks-panel">
-          <div className="panel-header">
-            <h3>
-              Tasks for {monthName}{" "}
-              {selectedDay}
-            </h3>
+        {/* RIGHT COLUMN: STACKED SIDEBAR */}
+        <aside className="sidebar-container">
+          {/* TASKS FOR SELECTED DAY */}
+          <div className="side-panel">
+            <div className="panel-header">
+              <h3>
+                Tasks for {monthName} {selectedDay}
+              </h3>
+              <p className="panel-subtitle">Scheduled for this date</p>
+            </div>
+
+            <div className="tasks-list">
+              {selectedDayTasks.length > 0 ? (
+                selectedDayTasks.map((task) => (
+                  <div className="task-item-card" key={task.id}>
+                    <div className="task-item-top">
+                      <span className="task-name">{task.task}</span>
+
+                      <span
+                        className={`badge ${
+                          task.status === "Completed"
+                            ? "badge-done"
+                            : "badge-pending"
+                        }`}
+                      >
+                        {task.status}
+                      </span>
+                    </div>
+
+                    <div className="task-item-bottom">
+                      <span className="assignee">
+                        Assigned to: {task.assignedTo}
+                      </span>
+                      <span className="time">{formatDate(task.dueDate)}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="task-item-card empty-card">
+                  <span className="task-name empty-text">
+                    No tasks scheduled for this day
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="tasks-list">
-            <span className="group-label">
-              Scheduled
-            </span>
+          {/* UPCOMING SCHEDULE SECTION */}
+          <div className="side-panel">
+            <div className="panel-header">
+              <h3>Upcoming Schedule</h3>
+              <p className="panel-subtitle">Your next planned activities</p>
+            </div>
 
-            {selectedDayTasks.length > 0 ? (
-              selectedDayTasks.map((task) => (
-                <div className="task-item-card" key={task.id}>
-                  <div className="task-item-top">
-                    <span className="task-name">{task.task}</span>
-
-                    <span className={`badge ${task.status === "Completed" ? "badge-done" : "badge-pending"}`}>
-                      {task.status}
-                    </span>
+            <div className="upcoming-list">
+              {upcomingSchedule.map((item) => (
+                <div key={item.day} className="upcoming-item-card">
+                  <div>
+                    <p className="upcoming-day">{item.day}</p>
+                    <p className="upcoming-time">{item.time}</p>
                   </div>
-
-                  <div className="task-item-bottom">
-                    <span className="assignee">Assigned to: {task.assignedTo}</span>
-
-                    <span className="time">{formatDate(task.dueDate)}</span>
-                  </div>
+                  <Clock className="upcoming-icon" />
                 </div>
-              ))
-            ) : (
-              <div className="task-item-card">
-                <div className="task-item-top">
-                  <span className="task-name">No tasks for you on this day</span>
+              ))}
+            </div>
+          </div>
+
+          {/* MONTHLY SUMMARY CARD (FILLED BOTTOM DEAD SPACE) */}
+          <div className="side-panel summary-panel">
+            <div className="panel-header">
+              <h3>Monthly Workload</h3>
+              <p className="panel-subtitle">{monthName} progress</p>
+            </div>
+
+            <div className="summary-body">
+              <div className="summary-stat">
+                <div>
+                  <p className="stat-label">Tasks Completed</p>
+                  <p className="stat-value">
+                    {completedMonthTasks} / {totalMonthTasks}
+                  </p>
                 </div>
+                <div className="stat-badge">{completionPercentage}%</div>
               </div>
-            )}
+
+              <div className="progress-track">
+                <div
+                  className="progress-fill"
+                  style={{ width: `${completionPercentage}%` }}
+                />
+              </div>
+            </div>
           </div>
         </aside>
       </div>
 
-      {/* New Task Modal Popup */}
+      {/* NEW TASK MODAL */}
       <NewTaskModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
