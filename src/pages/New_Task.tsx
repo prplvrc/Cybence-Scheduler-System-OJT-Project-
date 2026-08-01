@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { X, ChevronDown, Calendar, Check } from "lucide-react";
 
-interface NewTaskFormData {
+export interface NewTaskFormData {
   title: string;
   description: string;
   assignTo: string;
@@ -136,7 +136,7 @@ export default function NewTaskModal({ isOpen, onClose, onSubmit }: NewTaskModal
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
       <div 
         ref={containerRef}
-        className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] rounded-[24px] border border-white/80 bg-white/95 p-6 backdrop-blur-2xl shadow-xl"
+        className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto scrollbar-none rounded-3xl border border-white/80 bg-white/95 p-6 backdrop-blur-2xl shadow-xl"
       >
         
         {/* Header */}

@@ -23,7 +23,7 @@ export default function RequestPage() {
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="page-surface page-surface--compact">
       {/* Page Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800">Request Form</h1>

@@ -1,6 +1,7 @@
 ﻿import { useState } from "react";
 import "./Calendar.css";
 import NewTaskModal from "./New_Task";
+import type { NewTaskFormData } from "./New_Task";
 import type { Task } from "./Task_Board";
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -83,7 +84,7 @@ export default function Calendar({
 
   const taskDaysWithOwnerTasks = new Set(ownerTasks.map((task) => new Date(task.dueDate).getDate()));
 
-  const handleCreateTask = (taskData: any) => {
+  const handleCreateTask = (taskData: NewTaskFormData) => {
     const newTask: Task = {
       id: Date.now(),
       task: taskData.title,

@@ -68,16 +68,16 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       
       {/* Background Glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] -left-[10%] w-[70vw] h-[50vh] rotate-[-25deg] rounded-[100%] bg-gradient-to-br from-[#106fb8]/35 to-sky-300/20 blur-[130px]" />
-        <div className="absolute -bottom-[20%] -right-[10%] w-[75vw] h-[55vh] rotate-[20deg] rounded-[100%] bg-gradient-to-tl from-sky-400/35 to-[#106fb8]/20 blur-[140px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-4xl h-[400px] rounded-full bg-sky-200/30 blur-[150px]" />
+        <div className="absolute top-[-20%] left-[-10%] w-[70vw] h-[50vh] rotate-[-25deg] rounded-[100%] bg-linear-to-br from-[#106fb8]/35 to-sky-300/20 blur-[130px]" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[75vw] h-[55vh] rotate-20deg rounded-[100%] bg-linear-to-tl from-sky-400/35 to-[#106fb8]/20 blur-[140px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-4xl h-100 rounded-full bg-sky-200/30 blur-[150px]" />
       </div>
 
       {/* Card Container */}
       <div className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-white/80 bg-white/85 backdrop-blur-xl p-6 shadow-[0_15px_35px_rgba(0,0,0,0.06)] transition-all sm:p-7">
         
         {/* Accent Bar */}
-        <div className="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-sky-400 to-[#106fb8]" />
+        <div className="absolute left-0 top-0 h-1 w-full bg-linear-to-r from-sky-400 to-[#106fb8]" />
 
         {/* Header */}
         <div className="mb-5 flex flex-col items-center text-center">

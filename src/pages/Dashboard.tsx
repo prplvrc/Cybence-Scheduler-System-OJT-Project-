@@ -22,7 +22,8 @@ import TaskBoard from "./Task_Board";
 import RequestsPage from "./Requests";
 import SettingsPage from "./Settings";
 import NewTaskModal from "./New_Task";
-import { initialTaskGroups, type Task } from "./Task_Board";
+import { type Task } from "./Task_Board";
+import { initialTaskGroups } from "./Task_Data";
 
 type DashboardProps = {
   onLogout: () => void;
@@ -30,7 +31,11 @@ type DashboardProps = {
   onTaskHighlightHandled?: () => void;
 };
 
-export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlightHandled }: DashboardProps) {
+export default function Dashboard({
+  onLogout,
+  highlightedTaskId,
+  onTaskHighlightHandled,
+}: DashboardProps) {
   const weeklyData = [
     { day: "Mon", value: 4 },
     { day: "Tue", value: 7 },
@@ -48,9 +53,24 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
   ];
 
   const recentTasks = [
-    { id: "1", title: "Task 1", date: "2026-07-07", status: "Completed" },
-    { id: "2", title: "Task 2", date: "2026-07-07", status: "Ongoing" },
-    { id: "3", title: "Task 3", date: "2026-07-07", status: "To Do" },
+    {
+      id: "1",
+      title: "Scheduler system for Cybence IT Solutions",
+      date: "2026-07-21",
+      status: "Pending",
+    },
+    {
+      id: "2",
+      title: "New payment gateway implementation",
+      date: "2026-07-16",
+      status: "Ongoing",
+    },
+    {
+      id: "3",
+      title: "New user interface implementation",
+      date: "2026-07-19",
+      status: "To Do",
+    },
   ];
 
   const upcomingSchedule = [
@@ -61,12 +81,13 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
 
   const [activeTab, setActiveTab] = useState("dashboard");
 
-  const currentTab =
-    highlightedTaskId != null ? "tasks" : activeTab;
+  const currentTab = highlightedTaskId != null ? "tasks" : activeTab;
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [tasks, setTasks] = useState<Task[]>(() => initialTaskGroups.flatMap((group) => group.tasks));
+  const [tasks, setTasks] = useState<Task[]>(() =>
+    initialTaskGroups.flatMap((group) => group.tasks)
+  );
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -254,7 +275,7 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
 
       {/* DYNAMIC MAIN AREA */}
       <main
-        className={`relative z-10 h-full flex-1 overflow-y-auto ${
+        className={`dashboard-main relative z-10 h-full flex-1 overflow-y-auto ${
           activeTab === "profile" ? "p-0" : "p-4 sm:p-6 lg:p-8 space-y-6"
         }`}
       >
@@ -281,6 +302,7 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
               <div className="absolute left-0 top-0 h-1 w-full rounded-t-3xl bg-linear-to-r from-sky-400 via-sky-500 to-[#106fb8] shadow-[0_2px_8px_rgba(16,111,184,0.3)]" />
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                {/* LEFT SIDE: Mobile Menu + Greeting */}
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
@@ -293,27 +315,27 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
                     <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                       {greeting}, Perpaulo! 👋
                     </h1>
-                    <div className="mt-1 flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-500">
-                      <span className="flex items-center gap-1.5">
-                        <CalendarIcon className="h-4 w-4 text-[#106fb8]" />
-                        {formattedDate}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="h-4 w-4 text-[#106fb8]" />
-                        {formattedTime}
-                      </span>
-                    </div>
+                    <p className="text-sm text-slate-500 font-medium">
+                      Here is what's happening with your workspace today.
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setIsNewTaskOpen(true)}
-                    className="flex items-center gap-2 rounded-2xl bg-[#106fb8] px-5 py-3 text-sm font-semibold text-white shadow-md shadow-[#106fb8]/20 transition-all hover:bg-[#0e5ea4] hover:shadow-lg hover:shadow-[#106fb8]/30 hover:-translate-y-0.5 cursor-pointer"
-                  >
-                    <Plus className="h-4 w-4" />
-                    <span>New Task</span>
-                  </button>
+                {/* RIGHT SIDE: Date & Time + Action Buttons */}
+                <div className="flex items-center gap-4">
+                  <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-500">
+                    <span className="flex items-center gap-1.5">
+                      <CalendarIcon className="h-4 w-4 text-[#106fb8]" />
+                      {formattedDate}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Clock className="h-4 w-4 text-[#106fb8]" />
+                      {formattedTime}
+                    </span>
+                  </div>
+
+                  {/* ACTION BUTTONS */}
+                  {/* If you add buttons here later, they will sit right beside the time */}
                 </div>
               </div>
             </section>
@@ -321,7 +343,7 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
             {/* STATS GRID */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard
-                value="9"
+                value="10"
                 title="Total Tasks"
                 subtitle="All works"
                 icon={<ListTodo className="h-5 w-5 text-[#106fb8]" />}
@@ -335,14 +357,14 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
                 bg="bg-amber-50"
               />
               <StatCard
-                value="3"
+                value="2"
                 title="Ongoing"
                 subtitle="Active works"
                 icon={<TrendingUp className="h-5 w-5 text-sky-600" />}
                 bg="bg-sky-50"
               />
               <StatCard
-                value="4"
+                value="2"
                 title="Completed"
                 subtitle="Completed works"
                 icon={<CheckCircle2 className="h-5 w-5 text-emerald-600" />}
@@ -371,7 +393,7 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
                       </div>
                       <div className="flex h-full w-full max-w-9 items-end justify-center rounded-2xl bg-slate-100 p-1 transition-colors group-hover:bg-sky-100">
                         <div
-                          className="w-full rounded-xl bg-linear-to-t from-[#106fb8] to-sky-400 shadow-sm transition-all duration-500"
+                          className="w-full rounded-xl bg-linear-to-t from-[#106fb8] to-sky-400 shadow-xs transition-all duration-500"
                           style={{
                             height: `${(item.value / 8) * 100}%`,
                           }}
@@ -400,11 +422,11 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
                     className="h-40 w-40 rounded-full shadow-inner"
                     style={{
                       background:
-                        "conic-gradient(#106fb8 0% 44%, #38bdf8 44% 77%, #cbd5e1 77% 100%)",
+                        "conic-gradient(#106fb8 0% 20%, #38bdf8 20% 40%, #fbbf24 40% 60%, #cbd5e1 60% 100%)",
                     }}
                   />
                   <div className="absolute flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white/90 backdrop-blur-md">
-                    <span className="text-2xl font-bold text-slate-900">9</span>
+                    <span className="text-2xl font-bold text-slate-900">10</span>
                     <span className="text-[10px] font-semibold uppercase text-slate-400">
                       Tasks
                     </span>
@@ -447,8 +469,12 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
                       className="flex items-start justify-between rounded-2xl border border-slate-100 bg-slate-50/70 px-3 py-3"
                     >
                       <div>
-                        <p className="text-sm font-semibold text-slate-800">{item.day}</p>
-                        <p className="mt-1 text-sm text-slate-500">{item.time}</p>
+                        <p className="text-sm font-semibold text-slate-800">
+                          {item.day}
+                        </p>
+                        <p className="mt-1 text-sm text-slate-500">
+                          {item.time}
+                        </p>
                       </div>
                       <Clock className="h-4 w-4 text-slate-400" />
                     </div>
@@ -539,6 +565,7 @@ export default function Dashboard({ onLogout, highlightedTaskId, onTaskHighlight
           setIsNewTaskOpen(false);
         }}
       />
+
     </div>
   );
 }
@@ -602,6 +629,7 @@ const statusStyles: Record<string, string> = {
   Completed: "bg-emerald-50 text-emerald-600 border-emerald-100",
   Ongoing: "bg-sky-50 text-sky-600 border-sky-100",
   "To Do": "bg-amber-50 text-amber-600 border-amber-100",
+  Pending: "bg-slate-100 text-slate-600 border-slate-200",
 };
 
 function TaskItem({

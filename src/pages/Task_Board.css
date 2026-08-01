@@ -407,3 +407,64 @@
   text-align: center;
   color: #94a3b8;
 }
+
+/* Shared workspace visual system */
+.task-board-view {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px clamp(16px, 3vw, 40px) 48px;
+  color: var(--ink);
+}
+
+.task-board-view .title-group h1 {
+  color: var(--ink);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+}
+
+.task-board-view .title-group .subtitle {
+  color: var(--muted);
+}
+
+.task-board-view .timestamp-badge,
+.task-board-view .search-box input,
+.task-board-view .sort-select,
+.task-board-view .task-group-card {
+  border-color: var(--line);
+  border-radius: var(--radius-md);
+}
+
+.task-board-view .btn-primary {
+  border-radius: var(--radius-sm);
+  background: var(--brand);
+}
+
+.task-board-view .btn-primary:hover {
+  background: var(--brand-dark);
+}
+
+.task-board-view .task-group-card {
+  box-shadow: var(--shadow-sm);
+}
+
+.task-board-view .group-header-btn {
+  border-radius: var(--radius-md);
+}
+
+@media (max-width: 760px) {
+  .task-board-view {
+    padding: 20px 16px 32px;
+  }
+
+  .task-board-view .header-right,
+  .task-board-view .toolbar-section {
+    width: 100%;
+  }
+
+  .task-board-view .timestamp-badge,
+  .task-board-view .btn-primary,
+  .task-board-view .search-box,
+  .task-board-view .sort-select {
+    width: 100%;
+    max-width: none;
+  }
+}

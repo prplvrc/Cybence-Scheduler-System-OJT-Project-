@@ -270,3 +270,68 @@
   font-size: 12px;
   color: #64748b;
 }
+
+/* Shared workspace visual system */
+.calendar-view {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px clamp(16px, 3vw, 40px) 48px;
+  color: var(--ink);
+}
+
+.calendar-view .page-header {
+  margin-bottom: 24px;
+}
+
+.calendar-view .title-group h1,
+.calendar-view .month-header h2,
+.calendar-view .panel-header h3 {
+  color: var(--ink);
+}
+
+.calendar-view .title-group h1 {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  letter-spacing: -0.02em;
+}
+
+.calendar-view .subtitle,
+.calendar-view .task-item-bottom {
+  color: var(--muted);
+}
+
+.calendar-view .timestamp-badge,
+.calendar-view .calendar-card,
+.calendar-view .tasks-panel {
+  border-color: var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.calendar-view .btn-primary {
+  border-radius: var(--radius-sm);
+  background: var(--brand);
+}
+
+.calendar-view .btn-primary:hover {
+  background: var(--brand-dark);
+}
+
+.calendar-view .nav-btn {
+  border-color: var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.calendar-view .task-item-card {
+  border-color: var(--line);
+  border-radius: var(--radius-md);
+}
+
+@media (max-width: 760px) {
+  .calendar-view {
+    padding: 20px 16px 32px;
+  }
+
+  .calendar-grid {
+    grid-template-columns: 1fr;
+  }
+}

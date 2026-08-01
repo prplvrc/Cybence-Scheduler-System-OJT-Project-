@@ -83,7 +83,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="page-surface page-surface--compact">
       <h1 className="text-2xl font-bold text-gray-800 mb-2">Settings</h1>
       <p className="text-gray-500 mb-6">Manage your account settings and preferences.</p>
 

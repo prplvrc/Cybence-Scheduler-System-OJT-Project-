@@ -7,6 +7,7 @@ import {
   Phone,
   ShieldCheck,
   Sparkles,
+  ArrowLeft,
 } from "lucide-react";
 
 type ProfileFormState = {
@@ -19,11 +20,11 @@ type ProfileFormState = {
 };
 
 const initialProfile: ProfileFormState = {
-  name: "Maria Dela Cruz",
-  title: "Scheduler • Team Lead • Cybence Operations",
+  name: "Perpaulo Varca",
+  title: "Intern • Cybence Operations",
   about:
     "Maria is responsible for organizing schedules, ensuring smooth coordination across teams, and maintaining reliable communication with clients. She enjoys creating order out of busy workflows and helping others stay on track.",
-  email: "maria.dela.cruz@cybence.com",
+  email: "perpaulo.varca@cybence.com",
   phone: "+63 912 345 6789",
   department: "Operations & Scheduling",
 };
@@ -38,7 +39,7 @@ type ProfilePageProps = {
   onBackToDashboard?: () => void;
 };
 
-export default function ProfilePage({}: ProfilePageProps) {
+export default function ProfilePage({ onBackToDashboard }: ProfilePageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState<ProfileFormState>(initialProfile);
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -84,18 +85,12 @@ export default function ProfilePage({}: ProfilePageProps) {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-slate-50 p-4 sm:p-6 lg:p-8">
-      {/* Ambient Mesh Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] -left-[10%] h-[50vh] w-[70vw] rotate-[-25deg] rounded-[100%] bg-gradient-to-br from-[#106fb8]/35 to-sky-300/20 blur-[130px]" />
-        <div className="absolute -bottom-[20%] -right-[10%] h-[55vh] w-[75vw] rotate-[20deg] rounded-[100%] bg-gradient-to-tl from-sky-400/35 to-[#106fb8]/20 blur-[140px]" />
-        <div className="absolute left-1/2 top-1/2 h-[400px] w-[90vw] max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-200/30 blur-[150px]" />
-      </div>
+    <div className="page-surface relative min-h-screen overflow-x-hidden">
 
       <div className="relative mx-auto max-w-6xl space-y-6 pb-1">
         {/* Profile Header */}
-        <section className="relative overflow-hidden rounded-[32px] border border-white/80 bg-white/85 p-8 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
-          <div className="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-sky-400 to-[#106fb8]" />
+        <section className="relative overflow-hidden rounded-4xl border border-white/80 bg-white/85 p-8 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
+          <div className="absolute left-0 top-0 h-1 w-full bg-linear-to-r from-sky-400 to-[#106fb8]" />
 
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -146,6 +141,16 @@ export default function ProfilePage({}: ProfilePageProps) {
             </div>
 
             <div className="flex flex-wrap gap-3">
+              {onBackToDashboard ? (
+                <button
+                  type="button"
+                  onClick={onBackToDashboard}
+                  className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50"
+                >
+                  <ArrowLeft size={16} />
+                  Back to dashboard
+                </button>
+              ) : null}
               {isEditing ? (
                 <>
                   <button
@@ -190,7 +195,7 @@ export default function ProfilePage({}: ProfilePageProps) {
           {/* Left Column */}
           <div className="space-y-6 flex flex-col">
             {/* About */}
-            <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
+            <section className="rounded-4xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-slate-900">About Me</h2>
@@ -216,7 +221,7 @@ export default function ProfilePage({}: ProfilePageProps) {
             </section>
 
             {/* Contact Information */}
-            <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
+            <section className="rounded-4xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
               <h2 className="text-lg font-semibold text-slate-900">Contact Information</h2>
 
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -256,7 +261,7 @@ export default function ProfilePage({}: ProfilePageProps) {
           {/* Right Column */}
           <div className="space-y-6 flex flex-col">
             {/* Stats */}
-            <section className="rounded-[32px] border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
+            <section className="rounded-4xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-slate-900">Performance Snapshot</h2>
 

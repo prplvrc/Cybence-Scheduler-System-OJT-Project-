@@ -1,6 +1,152 @@
 @import "tailwindcss";
 
+:root {
+  --brand: #106fb8;
+  --brand-dark: #0b5d9d;
+  --brand-soft: #eaf5fc;
+  --ink: #102a43;
+  --muted: #627d98;
+  --line: #d9e2ec;
+  --surface: #ffffff;
+  --canvas: #f4f8fb;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --shadow-sm: 0 2px 8px rgba(16, 42, 67, 0.05);
+  --shadow-md: 0 14px 34px rgba(16, 42, 67, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
-  font-family: "Poppins", sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(16, 111, 184, 0.2);
+  outline-offset: 2px;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(105, 192, 235, 0.18), transparent 28rem),
+    radial-gradient(circle at 92% 100%, rgba(16, 111, 184, 0.12), transparent 32rem),
+    var(--canvas);
+}
+
+.page-surface {
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  padding: 32px clamp(16px, 3vw, 40px) 48px;
+}
+
+.page-surface--compact {
+  width: min(100%, 1080px);
+}
+
+.surface-card {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.app-quick-actions button {
+  border-radius: var(--radius-sm) !important;
+  border-color: var(--line) !important;
+  color: var(--muted) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.app-quick-actions button:hover {
+  border-color: #9fb3c8 !important;
+  color: var(--brand) !important;
+}
+
+.page-surface > h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  line-height: 1.2;
+}
+
+.page-surface > p {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.page-surface input:not([type="checkbox"]):not([type="radio"]),
+.page-surface select,
+.page-surface textarea {
+  border-color: var(--line) !important;
+  border-radius: var(--radius-sm) !important;
+  background: #fbfdff !important;
+  color: var(--ink);
+  min-height: 42px;
+}
+
+.page-surface input:not([type="checkbox"]):not([type="radio"]):focus,
+.page-surface select:focus,
+.page-surface textarea:focus {
+  border-color: var(--brand) !important;
+  background: var(--surface) !important;
+  box-shadow: 0 0 0 3px rgba(16, 111, 184, 0.1);
+}
+
+.page-surface form,
+.page-surface > div > section,
+.page-surface > section {
+  border-color: var(--line) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.page-surface button[type="submit"] {
+  border-radius: var(--radius-sm) !important;
+  background: var(--brand) !important;
+}
+
+.page-surface button[type="submit"]:hover {
+  background: var(--brand-dark) !important;
+}
+
+@media (max-width: 640px) {
+  .page-surface {
+    padding: 20px 16px 32px;
+  }
+
+  .app-quick-actions {
+    right: 12px !important;
+    top: 12px !important;
+  }
 }
