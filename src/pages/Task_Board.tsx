@@ -94,8 +94,7 @@ const buildTaskGroups = (tasks: Task[]): TaskGroup[] => {
 
 export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHighlightHandled }: TaskBoardProps) {
   const [search, setSearch] = useState("");
-  const [dateSortMode, setDateSortMode] = useState<"default" | "date-newest" | "date-oldest">("default");
-  const [priorityFilter, setPriorityFilter] = useState<"all" | "low" | "medium" | "high" | "critical">("all");
+  const [filterMode, setFilterMode] = useState<string>("default");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -145,17 +144,25 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
 
     const filteredTasks = tasks.filter((task) => {
       const matchesSearch = task.task.toLowerCase().includes(normalizedSearch);
-      const matchesPriority = priorityFilter === "all" || task.priority.toLowerCase() === priorityFilter.toLowerCase();
 
-      return matchesSearch && matchesPriority;
+      if (filterMode.startsWith("priority-")) {
+        const targetPriority = filterMode.replace("priority-", "");
+        return matchesSearch && task.priority.toLowerCase() === targetPriority;
+      }
+
+      return matchesSearch;
     });
 
-    if (dateSortMode === "date-newest") {
-      return [...filteredTasks].sort((a, b) => new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime());
+    if (filterMode === "date-newest") {
+      return [...filteredTasks].sort(
+        (a, b) => new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime()
+      );
     }
 
-    if (dateSortMode === "date-oldest") {
-      return [...filteredTasks].sort((a, b) => new Date(a.createdOn).getTime() - new Date(b.createdOn).getTime());
+    if (filterMode === "date-oldest") {
+      return [...filteredTasks].sort(
+        (a, b) => new Date(a.createdOn).getTime() - new Date(b.createdOn).getTime()
+      );
     }
 
     return filteredTasks;
@@ -163,8 +170,12 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
 
   const taskGroups = buildTaskGroups(tasks);
 
+<<<<<<< Updated upstream
   // Handle task creation submission from the modal
   const handleCreateTask = (taskData: NewTaskFormData) => {
+=======
+  const handleCreateTask = (taskData: any) => {
+>>>>>>> Stashed changes
     const newTask: Task = {
       id: Date.now(),
       task: taskData.title,
@@ -217,26 +228,25 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
           />
         </div>
 
+        {/* Consolidated Single Filter & Sort Dropdown */}
         <select
           className="sort-select"
-          value={dateSortMode}
-          onChange={(e) => setDateSortMode(e.target.value as typeof dateSortMode)}
+          value={filterMode}
+          onChange={(e) => setFilterMode(e.target.value)}
         >
-          <option value="default">Default</option>
-          <option value="date-newest">Newest to oldest</option>
-          <option value="date-oldest">Oldest to newest</option>
-        </select>
+          <option value="default">All Tasks (Default)</option>
 
-        <select
-          className="sort-select"
-          value={priorityFilter}
-          onChange={(e) => setPriorityFilter(e.target.value as typeof priorityFilter)}
-        >
-          <option value="all">All</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-          <option value="critical">Critical</option>
+          <optgroup label="Sort by Date">
+            <option value="date-newest">Newest to oldest</option>
+            <option value="date-oldest">Oldest to newest</option>
+          </optgroup>
+
+          <optgroup label="Filter by Priority">
+            <option value="priority-low">Low Priority</option>
+            <option value="priority-medium">Medium Priority</option>
+            <option value="priority-high">High Priority</option>
+            <option value="priority-critical">Critical Priority</option>
+          </optgroup>
         </select>
       </div>
 
