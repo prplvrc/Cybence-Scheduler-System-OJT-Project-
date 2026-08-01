@@ -249,7 +249,6 @@ export default function Requests() {
             {/* FULL-WIDTH REASON TEXT AREA */}
             <div className="pt-2">
               <label className="mb-1.5 flex text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-[#106fb8]" />
                 Reason / Detailed Justification <span className="text-red-500">*</span>
               </label>
               <textarea

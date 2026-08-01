@@ -6,6 +6,13 @@ import {
   Search,
   SlidersHorizontal,
   X,
+  Calendar,
+  User,
+  Tag,
+  Clock,
+  CheckCircle2,
+  UserCheck,
+  FileText,
 } from "lucide-react";
 import NewTaskModal from "./New_Task";
 import type { NewTaskFormData } from "./New_Task";
@@ -14,6 +21,7 @@ import "./Task_Board.css";
 export interface Task {
   id: number;
   task: string;
+  description?: string;
   creator: string;
   assignedTo: string;
   createdOn: string;
@@ -44,7 +52,44 @@ type TaskBoardProps = {
 };
 
 const PRIORITIES = ["Low", "Medium", "High", "Critical"];
-const STATUSES = ["To Be Assigned", "To Do", "Ongoing", "Completed", "Unfinished"];
+const ALL_STATUSES = ["To Be Assigned", "To Do", "Ongoing", "Completed", "Unfinished"];
+// Status options selectable by user when manually updating a task's status
+const UPDATE_STATUS_OPTIONS = ["To Do", "Ongoing", "Completed"];
+
+/**
+ * Computes effective status dynamically based on due date for overdue tasks.
+ */
+
+export function getEffectiveStatus(task: Task): string {
+  if (task.status === "Completed") {
+    return "Completed";
+  }
+
+  if (
+    task.status === "To Be Assigned" ||
+    task.status === "Backlog" ||
+    task.status === "Pending" ||
+    task.assignedTo === "Open" ||
+    task.assignedTo === "Unassigned" ||
+    !task.assignedTo
+  ) {
+    return "To Be Assigned";
+  }
+
+  if (task.dueDate) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const taskDueDate = new Date(task.dueDate);
+    taskDueDate.setHours(0, 0, 0, 0);
+
+    if (taskDueDate < today) {
+      return "Unfinished";
+    }
+  }
+
+  return task.status;
+}
 
 const buildTaskGroups = (tasks: Task[]): TaskGroup[] => {
   const groupMap: Record<string, TaskGroup> = {
@@ -81,21 +126,11 @@ const buildTaskGroups = (tasks: Task[]): TaskGroup[] => {
   };
 
   tasks.forEach((task) => {
-    const groupTitle =
-      task.status === "Backlog" || task.status === "Pending"
-        ? "To Be Assigned"
-        : task.status === "To Do"
-        ? "To Do"
-        : task.status === "Ongoing"
-        ? "Ongoing"
-        : task.status === "Completed"
-        ? "Completed"
-        : task.status === "Unfinished"
-        ? "Unfinished"
-        : "To Be Assigned";
-
-    if (groupMap[groupTitle]) {
-      groupMap[groupTitle].tasks.push(task);
+    const effectiveStatus = getEffectiveStatus(task);
+    if (groupMap[effectiveStatus]) {
+      groupMap[effectiveStatus].tasks.push(task);
+    } else {
+      groupMap["To Be Assigned"].tasks.push(task);
     }
   });
 
@@ -111,6 +146,7 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
   });
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -154,11 +190,9 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
     second: "2-digit",
   });
 
-  // Check if any filter or custom sort is active
   const hasActiveFilters =
     filter.priorities.length > 0 || filter.statuses.length > 0 || filter.sort !== "desc";
 
-  // Filter and sort tasks dynamically
   const filteredTasks = useMemo(() => {
     let result = [...tasks];
 
@@ -179,7 +213,7 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
     }
 
     if (filter.statuses.length > 0) {
-      result = result.filter((t) => filter.statuses.includes(t.status));
+      result = result.filter((t) => filter.statuses.includes(getEffectiveStatus(t)));
     }
 
     result.sort((a, b) => {
@@ -194,19 +228,41 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
   const taskGroups = buildTaskGroups(filteredTasks);
 
   const handleCreateTask = (taskData: NewTaskFormData) => {
+    const isOpenForAnyone = taskData.assignTo === "Open for anyone to take";
+    const initialStatus = isOpenForAnyone ? "To Be Assigned" : "To Do";
+
     const newTask: Task = {
       id: Date.now(),
       task: taskData.title,
+      description: taskData.description || "",
       creator: "You",
-      assignedTo: taskData.assignTo === "Open for anyone to take" ? "Open" : taskData.assignTo,
+      assignedTo: isOpenForAnyone ? "Open" : taskData.assignTo,
       createdOn: new Date().toISOString().split("T")[0],
-      status: taskData.status,
+      status: taskData.status || initialStatus,
       dueDate: taskData.dueDate || new Date().toISOString().split("T")[0],
       priority: taskData.priority || "Medium",
     };
 
     onTasksChange([...tasks, newTask]);
     setIsModalOpen(false);
+  };
+
+  const handleUpdateTaskStatus = (taskId: number, newStatus: string) => {
+    const updated = tasks.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t));
+    onTasksChange(updated);
+    if (selectedTask?.id === taskId) {
+      setSelectedTask((prev) => (prev ? { ...prev, status: newStatus } : null));
+    }
+  };
+
+  const handleTakeTask = (taskId: number) => {
+    const updated = tasks.map((t) =>
+      t.id === taskId ? { ...t, assignedTo: "You", status: "To Do" } : t
+    );
+    onTasksChange(updated);
+    if (selectedTask?.id === taskId) {
+      setSelectedTask((prev) => (prev ? { ...prev, assignedTo: "You", status: "To Do" } : null));
+    }
   };
 
   return (
@@ -288,6 +344,7 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
             dotClass={group.dotClass}
             tasks={group.tasks}
             highlightTaskId={highlightTaskId ?? null}
+            onSelectTask={(task) => setSelectedTask(task)}
           />
         ))}
       </div>
@@ -298,6 +355,16 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
           filter={filter}
           onChange={(newFilter) => setFilter(newFilter)}
           onClose={() => setShowFilterModal(false)}
+        />
+      )}
+
+      {/* Task Details Modal Popup */}
+      {selectedTask && (
+        <TaskDetailsModal
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+          onStatusChange={handleUpdateTaskStatus}
+          onTakeTask={handleTakeTask}
         />
       )}
 
@@ -321,6 +388,135 @@ const formatDate = (value: string) => {
     year: "numeric",
   });
 };
+
+function TaskDetailsModal({
+  task,
+  onClose,
+  onStatusChange,
+  onTakeTask,
+}: {
+  task: Task;
+  onClose: () => void;
+  onStatusChange: (taskId: number, status: string) => void;
+  onTakeTask: (taskId: number) => void;
+}) {
+  const effectiveStatus = getEffectiveStatus(task);
+  const isUnassigned = effectiveStatus === "To Be Assigned";
+
+  return (
+    <div className="filter-modal-overlay">
+      <div className="filter-modal-card max-w-lg w-full bg-white rounded-2xl p-6 shadow-xl space-y-5">
+        {/* Header */}
+        <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+          <div className="space-y-1 pr-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#106fb8]">Task Details</span>
+            <h2 className="text-xl font-extrabold text-slate-900 leading-snug">{task.task}</h2>
+          </div>
+          <button type="button" onClick={onClose} className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition">
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Task Description */}
+        <div className="p-3 bg-slate-50/60 rounded-xl border border-slate-100 space-y-1">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-wide">
+            <FileText className="w-3.5 h-3.5 text-[#106fb8]" /> Description
+          </div>
+          <p className="text-sm text-slate-700 leading-relaxed">
+            {task.description && task.description.trim() !== ""
+              ? task.description
+              : "No specific details or description provided for this task."}
+          </p>
+        </div>
+
+        {/* Details Grid */}
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="flex items-center gap-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100">
+            <User className="w-4 h-4 text-[#106fb8]" />
+            <div>
+              <p className="text-xs text-slate-400 font-medium">Created By</p>
+              <p className="font-semibold text-slate-800">{task.creator}</p>
+            </div>
+          </div>
+
+          {!isUnassigned && (
+            <div className="flex items-center gap-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100">
+              <UserCheck className="w-4 h-4 text-[#106fb8]" />
+              <div>
+                <p className="text-xs text-slate-400 font-medium">Assigned To</p>
+                <p className="font-semibold text-slate-800">{task.assignedTo}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center gap-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100">
+            <Tag className="w-4 h-4 text-[#106fb8]" />
+            <div>
+              <p className="text-xs text-slate-400 font-medium">Priority</p>
+              <span className={`inline-block text-xs font-bold px-2 py-0.5 rounded-full mt-0.5 ${
+                task.priority === 'High' || task.priority === 'Critical' ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-700'
+              }`}>
+                {task.priority}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100">
+            <Calendar className="w-4 h-4 text-[#106fb8]" />
+            <div>
+              <p className="text-xs text-slate-400 font-medium">Due Date</p>
+              <p className="font-semibold text-slate-800">{formatDate(task.dueDate)}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Status Actions - Only displayed if the task is already assigned */}
+        {!isUnassigned && (
+          <div className="space-y-2 pt-1">
+            <label className="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-[#106fb8]" /> Update Status
+            </label>
+            <select
+              value={effectiveStatus === "Unfinished" ? "Ongoing" : task.status}
+              onChange={(e) => onStatusChange(task.id, e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold text-slate-700 outline-none focus:border-[#106fb8] focus:bg-white transition cursor-pointer"
+            >
+              {UPDATE_STATUS_OPTIONS.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+          {isUnassigned ? (
+            <button
+              type="button"
+              onClick={() => onTakeTask(task.id)}
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#106fb8] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#0d5ca0] transition cursor-pointer"
+            >
+              <CheckCircle2 size={16} />
+              Take This Task
+            </button>
+          ) : (
+            <div className="text-xs text-slate-400 font-medium">Assigned to {task.assignedTo}</div>
+          )}
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function FilterModal({
   filter,
@@ -360,7 +556,6 @@ function FilterModal({
         </div>
 
         <div className="filter-modal-body">
-          {/* Priority Filter */}
           <div className="filter-group">
             <label className="filter-label">Priority</label>
             <div className="filter-chip-row">
@@ -380,11 +575,10 @@ function FilterModal({
             </div>
           </div>
 
-          {/* Status Filter */}
           <div className="filter-group">
             <label className="filter-label">Status</label>
             <div className="filter-chip-row">
-              {STATUSES.map((s) => {
+              {ALL_STATUSES.map((s) => {
                 const active = local.statuses.includes(s);
                 return (
                   <button
@@ -400,7 +594,6 @@ function FilterModal({
             </div>
           </div>
 
-          {/* Sort Direction */}
           <div className="filter-group">
             <label className="filter-label">Sort by Created Date</label>
             <div className="filter-toggle-row">
@@ -418,7 +611,6 @@ function FilterModal({
           </div>
         </div>
 
-        {/* Footer Actions */}
         <div className="filter-modal-actions">
           <button
             type="button"
@@ -450,11 +642,13 @@ function TaskSection({
   dotClass,
   tasks,
   highlightTaskId,
+  onSelectTask,
 }: {
   title: string;
   dotClass: string;
   tasks: Task[];
   highlightTaskId?: number | null;
+  onSelectTask: (task: Task) => void;
 }) {
   const [open, setOpen] = useState(true);
 
@@ -493,7 +687,14 @@ function TaskSection({
 
             <tbody>
               {tasks.map((task) => (
-                <tr key={task.id} data-task-id={task.id} className={`table-row ${task.id === highlightTaskId ? "highlighted-task-row" : ""}`}>
+                <tr
+                  key={task.id}
+                  data-task-id={task.id}
+                  onClick={() => onSelectTask(task)}
+                  className={`table-row cursor-pointer transition hover:bg-slate-50/80 ${
+                    task.id === highlightTaskId ? "highlighted-task-row" : ""
+                  }`}
+                >
                   <td className="td-cell font-semibold text-slate-800">
                     {task.task}
                   </td>

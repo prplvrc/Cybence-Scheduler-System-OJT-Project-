@@ -28,9 +28,9 @@ export default function Settings() {
 
   // Form States
   const [profile, setProfile] = useState<ProfileSettings>({
-    fullName: 'Perpaulo Varca',
+    fullName: 'Daniel Sardalla',
     role: 'Intern',
-    email: 'perpaulo.varca@cybence.com',
+    email: 'daniel.sardalla@cybence.com',
     department: 'Development',
   });
 
@@ -92,7 +92,7 @@ export default function Settings() {
         <div className="space-y-1">
           <div className="flex items-center gap-3">
             <div>
-              <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Settings</h1>
+              <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Settings</h1>
               <p className="text-sm text-slate-500 font-medium">
                 Manage your account settings, preferences, and security configurations.
               </p>
@@ -121,7 +121,7 @@ export default function Settings() {
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* LEFT / CENTER: Settings Form Section (8 Columns) */}
-        <div className="lg:col-span-8 bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
+        <div className="lg:col-span-20 bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
           
           {/* Navigation Tabs */}
           <div className="flex items-center gap-2 border-b border-slate-100 pb-4">
@@ -156,7 +156,7 @@ export default function Settings() {
               {/* Avatar Section */}
               <div className="flex items-center gap-5 p-4 rounded-xl bg-slate-50/70 border border-slate-100">
                 <div className="w-16 h-16 rounded-2xl bg-[#106fb8] text-white flex items-center justify-center font-bold text-xl shadow-md shadow-[#106fb8]/20">
-                  PV
+                  DS
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-800">User Avatar</h3>
@@ -241,7 +241,6 @@ export default function Settings() {
                 {[
                   { key: 'push' as const, label: 'Browser Push Notifications', desc: 'Receive real-time pop-ups for critical updates.' },
                   { key: 'weeklyDigest' as const, label: 'Weekly Activity Summary', desc: 'Get a weekly summary report of completed tasks & logs.' },
-                  { key: 'emailAlerts' as const, label: 'Email Notifications', desc: 'Receive email alerts when direct requests are submitted or approved.' },
                 ].map((option) => (
                   <div
                     key={option.key}
@@ -319,47 +318,6 @@ export default function Settings() {
             </form>
           )}
 
-        </div>
-
-        {/* RIGHT SIDEBAR: Account Overview Card (4 Columns) */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-md border border-slate-800 space-y-6">
-            <div className="border-b border-slate-800 pb-4">
-              <span className="text-[10px] font-bold tracking-wider text-[#38bdf8] uppercase bg-blue-950/80 border border-blue-800/50 px-2.5 py-1 rounded-full">
-                Account Status
-              </span>
-              <h3 className="text-lg font-bold mt-3">Active Account</h3>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Cybence Information Technology Solutions
-              </p>
-            </div>
-
-            <div className="space-y-4 text-xs">
-              <div className="flex justify-between items-center py-2 border-b border-slate-800/60">
-                <span className="text-slate-400">User ID</span>
-                <span className="font-mono text-slate-300">CYB-8902</span>
-              </div>
-
-              <div className="flex justify-between items-center py-2 border-b border-slate-800/60">
-                <span className="text-slate-400">Role level</span>
-                <span className="font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md">
-                  {profile.role}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center py-2 border-b border-slate-800/60">
-                <span className="text-slate-400">Security Health</span>
-                <span className="font-semibold text-emerald-400">Protected</span>
-              </div>
-
-              <div className="bg-slate-800/60 rounded-xl p-3.5 border border-slate-700/50 space-y-1.5 mt-4">
-                <p className="text-slate-300 font-semibold text-xs">Need permissions updated?</p>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Role and department permissions are managed by your administrator. Contact HR or your lead for adjustments.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
 
       </div>
