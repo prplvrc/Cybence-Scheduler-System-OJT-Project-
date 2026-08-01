@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { FormEvent } from "react";
 import { User, Lock, Eye, EyeOff, AlertCircle, ArrowLeft, Mail } from "lucide-react";
 import logo from "../assets/cybence-logo.png";
@@ -15,19 +15,26 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Forgot Password state management
+  // Forgot Password state
   const [isForgotMode, setIsForgotMode] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetSent, setResetSent] = useState(false);
+
+  const resetEmailRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isForgotMode) {
+      resetEmailRef.current?.focus();
+    }
+  }, [isForgotMode]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       if (username.trim() === "admin" && password === "admin123") {
-        console.log({ username, password, rememberMe });
         setIsLoading(false);
         onLoginSuccess();
         return;
@@ -36,42 +43,49 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       setIsLoading(false);
       setError("Invalid username or password. Please use the demo credentials shown below.");
     }, 1200);
+
+    return () => clearTimeout(timer);
   };
 
   const handleResetPassword = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setIsLoading(false);
       setResetSent(true);
     }, 1200);
+
+    return () => clearTimeout(timer);
+  };
+
+  const clearError = () => {
+    if (error) setError(null);
   };
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-slate-50 p-4 overflow-hidden select-none">
       
-      {/* --- Dispersed Mesh Ambient Background --- */}
+      {/* Background Glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] -left-[10%] w-[70vw] h-[50vh] rotate-[-25deg] rounded-[100%] bg-gradient-to-br from-[#106fb8]/35 to-sky-300/20 blur-[130px]" />
-        <div className="absolute -bottom-[20%] -right-[10%] w-[75vw] h-[55vh] rotate-[20deg] rounded-[100%] bg-gradient-to-tl from-sky-400/35 to-[#106fb8]/20 blur-[140px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-4xl h-[400px] rounded-full bg-sky-200/30 blur-[150px]" />
+        <div className="absolute top-[-20%] left-[-10%] w-[70vw] h-[50vh] rotate-[-25deg] rounded-[100%] bg-linear-to-br from-[#106fb8]/35 to-sky-300/20 blur-[130px]" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[75vw] h-[55vh] rotate-20deg rounded-[100%] bg-linear-to-tl from-sky-400/35 to-[#106fb8]/20 blur-[140px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-4xl h-100 rounded-full bg-sky-200/30 blur-[150px]" />
       </div>
 
-      {/* Login Card - Reduced max-width (max-w-sm) and padding (p-6) */}
+      {/* Card Container */}
       <div className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-white/80 bg-white/85 backdrop-blur-xl p-6 shadow-[0_15px_35px_rgba(0,0,0,0.06)] transition-all sm:p-7">
         
-        {/* Top Accent Bar */}
-        <div className="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-sky-400 to-[#106fb8]" />
+        {/* Accent Bar */}
+        <div className="absolute left-0 top-0 h-1 w-full bg-linear-to-r from-sky-400 to-[#106fb8]" />
 
-        {/* Header Section - Scaled down logo & text margins */}
+        {/* Header */}
         <div className="mb-5 flex flex-col items-center text-center">
           <img 
             src={logo} 
             alt="Cybence Logo" 
             className="mb-2 h-10 w-auto object-contain transition-all sm:h-12" 
           />
-
           <h1 className="text-[1.6rem] sm:text-[1.8rem] font-bold tracking-tight text-slate-900 leading-tight">
             Cybence IT Solutions <br /> Scheduler
           </h1>
@@ -80,49 +94,60 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           </p>
         </div>
 
-        {/* Optional Error Alert */}
+        {/* Error Alert */}
         {error && (
-          <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-100 bg-red-50/80 p-2.5 text-xs font-semibold text-red-600">
+          <div 
+            role="alert"
+            aria-live="assertive"
+            className="mb-4 flex items-center gap-2 rounded-xl border border-red-100 bg-red-50/80 p-2.5 text-xs font-semibold text-red-600"
+          >
             <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
             <span>{error}</span>
           </div>
         )}
 
         {!isForgotMode ? (
-          /* LOGIN FORM - Reduced vertical spacing (space-y-3.5) */
           <form onSubmit={handleSubmit} className="space-y-3.5">
-            {/* Username Field */}
+            {/* Username */}
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-700">
+              <label htmlFor="username" className="mb-1 block text-xs font-semibold text-slate-700">
                 Username
               </label>
               <div className="group relative flex items-center">
                 <User className="absolute left-3.5 h-4 w-4 text-slate-400 pointer-events-none transition-colors group-focus-within:text-[#106fb8]" />
                 <input
+                  id="username"
                   type="text"
                   placeholder="Username"
                   autoComplete="username"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => {
+                    clearError();
+                    setUsername(e.target.value);
+                  }}
                   required
                   className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all hover:border-slate-300 focus:border-[#106fb8] focus:bg-white focus:ring-4 focus:ring-[#106fb8]/10"
                 />
               </div>
             </div>
 
-            {/* Password Field */}
+            {/* Password */}
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-700">
+              <label htmlFor="password" className="mb-1 block text-xs font-semibold text-slate-700">
                 Password
               </label>
               <div className="group relative flex items-center">
                 <Lock className="absolute left-3.5 h-4 w-4 text-slate-400 pointer-events-none transition-colors group-focus-within:text-[#106fb8]" />
                 <input
+                  id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   autoComplete="current-password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    clearError();
+                    setPassword(e.target.value);
+                  }}
                   required
                   className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 py-2 pl-9 pr-9 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all hover:border-slate-300 focus:border-[#106fb8] focus:bg-white focus:ring-4 focus:ring-[#106fb8]/10"
                 />
@@ -137,7 +162,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               </div>
             </div>
 
-            {/* Remember Me & Forgot Password - Compact font size & tight margins */}
+            {/* Controls */}
             <div className="flex items-center justify-between text-xs pt-0.5">
               <label className="flex cursor-pointer select-none items-center gap-1.5 text-slate-600">
                 <input
@@ -150,18 +175,35 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               </label>
               <button
                 type="button"
-                onClick={() => setIsForgotMode(true)}
+                onClick={() => {
+                  setError(null);
+                  setIsForgotMode(true);
+                }}
                 className="font-medium text-[#106fb8] transition-colors hover:underline hover:text-[#0e5ea4] focus:outline-none cursor-pointer"
               >
                 Forgot password?
               </button>
             </div>
 
-            <div className="rounded-xl border border-sky-100 bg-sky-50/80 px-3 py-2 text-[11px] text-slate-600">
-              <span className="font-semibold text-slate-800">Demo login:</span> username <span className="font-semibold text-slate-800">admin</span> / password <span className="font-semibold text-slate-800">admin123</span>
+            {/* Demo Hint Banner */}
+            <div className="flex items-center justify-between rounded-xl border border-sky-100 bg-sky-50/80 px-3 py-2 text-[11px] text-slate-600">
+              <div>
+                <span className="font-semibold text-slate-800">Demo login:</span> admin / admin123
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setUsername("admin");
+                  setPassword("admin123");
+                  clearError();
+                }}
+                className="font-semibold text-[#106fb8] hover:underline cursor-pointer"
+              >
+                Fill demo
+              </button>
             </div>
 
-            {/* Submit Button - Slimmer padding */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={isLoading}
@@ -178,7 +220,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             </button>
           </form>
         ) : (
-          /* FORGOT PASSWORD FORM */
+          /* Forgot Password Mode */
           <form onSubmit={handleResetPassword} className="space-y-3.5">
             {resetSent ? (
               <div className="text-center space-y-3 py-1">
@@ -202,12 +244,14 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             ) : (
               <>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-700">
+                  <label htmlFor="reset-email" className="mb-1 block text-xs font-semibold text-slate-700">
                     Email or Username
                   </label>
                   <div className="group relative flex items-center">
                     <Mail className="absolute left-3.5 h-4 w-4 text-slate-400 pointer-events-none transition-colors group-focus-within:text-[#106fb8]" />
                     <input
+                      id="reset-email"
+                      ref={resetEmailRef}
                       type="text"
                       placeholder="Enter your email or username"
                       value={resetEmail}
