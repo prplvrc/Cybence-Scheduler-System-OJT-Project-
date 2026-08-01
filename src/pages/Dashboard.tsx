@@ -256,7 +256,7 @@ export default function Dashboard({
         }`}
       >
         {activeTab === "profile" ? (
-          <ProfilePage onBackToDashboard={() => setActiveTab("dashboard")} />
+          <ProfilePage/>
         ) : activeTab === "calendar" ? (
           <CalendarPage
             tasks={tasks}
