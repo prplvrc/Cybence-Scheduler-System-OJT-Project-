@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Settings as SettingsIcon, User, Bell, Shield, CheckCircle2, AlertCircle, Camera, Save, Key } from 'lucide-react';
+import { Settings as User, Bell, Shield, CheckCircle2, AlertCircle, Camera, Save, Key } from 'lucide-react';
 
 type Tab = 'profile' | 'notifications' | 'security';
 

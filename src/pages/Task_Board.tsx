@@ -60,7 +60,7 @@ const UPDATE_STATUS_OPTIONS = ["To Do", "Ongoing", "Completed"];
  * Computes effective status dynamically based on due date for overdue tasks.
  */
 
-export function getEffectiveStatus(task: Task): string {
+function getEffectiveStatus(task: Task): string {
   if (task.status === "Completed") {
     return "Completed";
   }

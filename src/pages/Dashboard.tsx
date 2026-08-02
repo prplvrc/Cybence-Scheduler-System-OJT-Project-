@@ -130,21 +130,38 @@ export default function Dashboard({
         }`}
       >
         <div>
-          {/* Logo & Header */}
-          <div className="mb-8 flex items-center gap-2.5">
-            <img
-              src="src/assets/cybence-logo.png"
-              alt="Cybence Logo"
-              className="h-10 w-10 object-contain rounded-xl shrink-0"
-            />
-            <div className="min-w-0 flex-1 overflow-hidden">
-              <h1 className="text-xl font-bold tracking-[0.52em] text-[#106fb8] leading-none truncate">
-                CYBENCE
-              </h1>
-              <p className="text-[10px] text-slate-500 truncate mt-1">
-                Information Technology Solutions
-              </p>
-            </div>
+          {/* HEADER / BRANDING & ALIGNED CLOSE BUTTON */}
+          <div className="mb-6 flex items-start justify-between">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("dashboard");
+                setIsMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-2.5 rounded-xl px-2 py-1 text-left transition-colors hover:bg-slate-100/80 cursor-pointer"
+            >
+              <img
+                src="src/assets/cybence-logo.png"
+                alt="Cybence Logo"
+                className="h-10 w-10 shrink-0 rounded-xl object-contain"
+              />
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <h1 className="text-xl font-bold leading-none tracking-[0.52em] text-[#106fb8] truncate">
+                  CYBENCE
+                </h1>
+                <p className="mt-1 truncate text-[10px] text-slate-500">
+                  Information Technology Solutions
+                </p>
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="mt-1 flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 cursor-pointer lg:hidden"
+              aria-label="Close sidebar"
+            >
+              <X size={18} />
+            </button>
           </div>
 
           <div className="space-y-6">
@@ -256,7 +273,7 @@ export default function Dashboard({
         }`}
       >
         {activeTab === "profile" ? (
-          <ProfilePage/>
+          <ProfilePage />
         ) : activeTab === "calendar" ? (
           <CalendarPage
             tasks={tasks}

@@ -90,7 +90,7 @@ export default function ProfilePage() {
         
         {/* User Identity Banner Card (With Edit Button Moved Inside) */}
         <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#106fb8] to-sky-400" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-[#106fb8] to-sky-400" />
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             

@@ -117,11 +117,7 @@ function App() {
       return <Calendar />;
     }
 
-    return (
-      <ProfilePage
-        onBackToDashboard={() => setCurrentPage("dashboard")}
-      />
-    );
+    return <ProfilePage />;
   };
 
   return (

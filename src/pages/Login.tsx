@@ -33,7 +33,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     setIsLoading(true);
     setError(null);
 
-    const timer = setTimeout(() => {
+    window.setTimeout(() => {
       if (username.trim() === "admin" && password === "admin123") {
         setIsLoading(false);
         onLoginSuccess();
@@ -43,20 +43,16 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       setIsLoading(false);
       setError("Invalid username or password. Please use the demo credentials shown below.");
     }, 1200);
-
-    return () => clearTimeout(timer);
   };
 
   const handleResetPassword = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const timer = setTimeout(() => {
+    window.setTimeout(() => {
       setIsLoading(false);
       setResetSent(true);
     }, 1200);
-
-    return () => clearTimeout(timer);
   };
 
   const clearError = () => {

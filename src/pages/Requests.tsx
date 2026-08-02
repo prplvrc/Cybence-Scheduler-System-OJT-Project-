@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Send, AlertCircle, CheckCircle2, User, Calendar, FileText,} from "lucide-react";
+import { Send, AlertCircle, CheckCircle2,} from "lucide-react";
 
 export default function Requests() {
   const [requestType, setRequestType] = useState("Due Date Extension");
@@ -248,7 +248,7 @@ export default function Requests() {
 
             {/* FULL-WIDTH REASON TEXT AREA */}
             <div className="pt-2">
-              <label className="mb-1.5 flex text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+              <label className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700">
                 Reason / Detailed Justification <span className="text-red-500">*</span>
               </label>
               <textarea
