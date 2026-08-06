@@ -20,7 +20,7 @@ function App() {
   const [highlightedTaskId, setHighlightedTaskId] = useState<number | null>(null);
   const currentUser: AppUser = {
     id: "u1",
-    name: "Perpaulo Varca",
+    name: "Daniel Sardalla",
     role: "Intern",
   };
   const [messages, setMessages] = useState<AppMessage[]>([
@@ -29,7 +29,7 @@ function App() {
       senderId: "u2",
       recipientId: "u1",
       type: "message",
-      content: "Hey Perpaulo, please review the Cybence scheduler tasks.",
+      content: "Hey Daniel, please review the Cybence scheduler tasks.",
       read: false,
       timestamp: new Date().toISOString(),
     },
