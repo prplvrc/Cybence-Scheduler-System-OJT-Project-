@@ -26,15 +26,6 @@ import NewTaskModal from "./New_Task";
 import { type Task } from "./Task_Board";
 import { initialTaskGroups } from "./Task_Data";
 
-type DashboardPage =
-  | "dashboard"
-  | "tasks"
-  | "calendar"
-  | "requests"
-  | "settings"
-  | "profile"
-  | "audit";
-
 type DashboardProps = {
   onLogout: () => void;
   highlightedTaskId?: number | null;
@@ -51,12 +42,12 @@ export default function Dashboard({
   auditLogs,
 }: DashboardProps) {
   const weeklyData = [
-    { day: "Mon", value: 4 },
-    { day: "Tue", value: 7 },
-    { day: "Wed", value: 2 },
-    { day: "Thu", value: 5 },
-    { day: "Fri", value: 5 },
-    { day: "Sat", value: 1 },
+    { day: "Mon", completed: 4, ongoing: 3, created: 2 },
+    { day: "Tue", completed: 2, ongoing: 4, created: 1 },
+    { day: "Wed", completed: 3, ongoing: 1, created: 2 },
+    { day: "Thu", completed: 6, ongoing: 2, created: 0 },
+    { day: "Fri", completed: 5, ongoing: 3, created: 0 },
+    { day: "Sat", completed: 1, ongoing: 0, created: 0 },
   ];
 
   const teamMembers = [
@@ -93,6 +84,8 @@ export default function Dashboard({
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [chartLoaded, setChartLoaded] = useState(false);
+  const [pieReveal, setPieReveal] = useState(0);
   const [tasks, setTasks] = useState<Task[]>(() =>
     initialTaskGroups.flatMap((group) => group.tasks)
   );
@@ -101,6 +94,39 @@ export default function Dashboard({
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    // Trigger chart load animation when showing the dashboard tab
+    if (activeTab !== "dashboard") {
+      // ensure charts are reset when leaving
+      setChartLoaded(false);
+      return;
+    }
+
+    setChartLoaded(false);
+    const timeout = window.setTimeout(() => setChartLoaded(true), 150);
+    return () => window.clearTimeout(timeout);
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (!chartLoaded) {
+      setPieReveal(0);
+      return;
+    }
+
+    let revealValue = 0;
+    const interval = window.setInterval(() => {
+      revealValue += 6;
+      if (revealValue >= 360) {
+        setPieReveal(360);
+        window.clearInterval(interval);
+      } else {
+        setPieReveal(revealValue);
+      }
+    }, 50);
+
+    return () => window.clearInterval(interval);
+  }, [chartLoaded]);
 
   const greeting =
     currentTime.getHours() < 12
@@ -120,6 +146,12 @@ export default function Dashboard({
     minute: "2-digit",
     second: "2-digit",
   });
+
+  const pieRadius = 56;
+  const pieStroke = 18;
+  const pieCircumference = 2 * Math.PI * pieRadius;
+  const pieProgress = pieReveal / 360;
+  const pieStrokeDashoffset = pieCircumference * (1 - pieProgress);
 
   return (
     <div className="relative flex h-screen w-screen overflow-hidden bg-slate-50">
@@ -409,70 +441,149 @@ export default function Dashboard({
                   Task completions over the past week
                 </p>
 
-                <div className="mt-6 flex h-60 items-end justify-between gap-3 px-4 sm:gap-6">
-                  {weeklyData.map((item) => (
-                    <div
-                      key={item.day}
-                      className="group relative flex h-full flex-1 flex-col items-center justify-end"
-                    >
-                      <div className="absolute -top-7 opacity-0 transition-opacity group-hover:opacity-100 rounded-lg bg-slate-800 px-2 py-0.5 text-[10px] text-white pointer-events-none">
-                        {item.value} tasks
+                {(() => {
+                  const maxTotal = Math.max(
+                    1,
+                    ...weeklyData.map((d: any) => d.completed + d.ongoing + d.created)
+                  );
+
+                  return (
+                    <>
+                      <div className="mt-6 flex h-60 items-end justify-between gap-3 px-4 sm:gap-6">
+                        {weeklyData.map((item: any) => (
+                          <div
+                            key={item.day}
+                            className="group relative flex h-full flex-1 flex-col items-center justify-end"
+                          >
+                            <div className="absolute -top-14 opacity-0 transition-opacity group-hover:opacity-100 rounded-lg bg-white px-3 py-2 text-xs text-slate-800 shadow-md pointer-events-none w-36">
+                              <div className="font-semibold">{item.day}</div>
+                              <div className="mt-1 flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-emerald-500" /> <span className="text-[11px]">Completed: <strong className="ml-1">{item.completed}</strong></span></div>
+                              <div className="mt-1 flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-amber-400" /> <span className="text-[11px]">Ongoing: <strong className="ml-1">{item.ongoing}</strong></span></div>
+                              <div className="mt-1 flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-sky-500" /> <span className="text-[11px]">Created: <strong className="ml-1">{item.created}</strong></span></div>
+                            </div>
+
+                            <div className="flex h-full w-full max-w-9 items-end justify-center rounded-2xl bg-slate-100 p-1 transition-colors group-hover:bg-sky-100">
+                              <div
+                                className="w-full rounded-xl bg-linear-to-t from-[#106fb8] to-sky-400 shadow-xs"
+                                style={{
+                                  height: chartLoaded ? `${((item.completed + item.ongoing + item.created) / maxTotal) * 100}%` : "0%",
+                                  transition: "height 0.8s ease-out 150ms",
+                                  transformOrigin: "bottom",
+                                }}
+                              />
+                            </div>
+                            <span className="mt-3 text-xs font-medium text-slate-500">
+                              {item.day}
+                            </span>
+                          </div>
+                        ))}
                       </div>
-                      <div className="flex h-full w-full max-w-9 items-end justify-center rounded-2xl bg-slate-100 p-1 transition-colors group-hover:bg-sky-100">
-                        <div
-                          className="w-full rounded-xl bg-linear-to-t from-[#106fb8] to-sky-400 shadow-xs transition-all duration-500"
-                          style={{
-                            height: `${(item.value / 8) * 100}%`,
-                          }}
-                        />
+
+                      <div className="mt-4 flex items-center gap-4 px-4">
+                        <div className="flex items-center gap-2 text-xs text-slate-600">
+                          <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                          Completed
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-slate-600">
+                          <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+                          Ongoing
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-slate-600">
+                          <span className="h-2.5 w-2.5 rounded-full bg-sky-500" />
+                          Created
+                        </div>
                       </div>
-                      <span className="mt-3 text-xs font-medium text-slate-500">
-                        {item.day}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                    </>
+                  );
+                })()}
               </section>
 
               <section className="flex flex-col justify-between rounded-3xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900">
-                    Task Status
+                    Priority Distribution
                   </h2>
                   <p className="mt-0.5 text-xs text-slate-500">
-                    Proportional breakdown
+                    Breakdown by task priority
                   </p>
                 </div>
 
-                <div className="relative my-6 flex justify-center items-center">
-                  <div
-                    className="h-40 w-40 rounded-full shadow-inner"
-                    style={{
-                      background:
-                        "conic-gradient(#106fb8 0% 20%, #38bdf8 20% 40%, #fbbf24 40% 60%, #cbd5e1 60% 100%)",
-                    }}
-                  />
-                  <div className="absolute flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white/90 backdrop-blur-md">
-                    <span className="text-2xl font-bold text-slate-900">10</span>
-                    <span className="text-[10px] font-semibold uppercase text-slate-400">
-                      Tasks
-                    </span>
+                <div className="relative my-6 flex items-center justify-between gap-4">
+                  <div className="relative flex items-center gap-4">
+                    <svg
+                      className="h-40 w-40"
+                      viewBox="0 0 160 160"
+                      role="img"
+                      aria-label="Priority distribution donut chart"
+                    >
+                      <circle
+                        cx="80"
+                        cy="80"
+                        r="56"
+                        stroke="#e6eef7"
+                        strokeWidth={pieStroke}
+                        fill="none"
+                      />
+                      <circle
+                        cx="80"
+                        cy="80"
+                        r="56"
+                        stroke="url(#priorityGradient)"
+                        strokeWidth={pieStroke}
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeDasharray={pieCircumference}
+                        strokeDashoffset={pieStrokeDashoffset}
+                        transform="rotate(-90 80 80)"
+                        style={{ transition: "stroke-dashoffset 0.6s ease-out" }}
+                      />
+                      <defs>
+                        <linearGradient id="priorityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#16a34a" />
+                          <stop offset="30%" stopColor="#f59e0b" />
+                          <stop offset="65%" stopColor="#fb923c" />
+                          <stop offset="100%" stopColor="#ef4444" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white/90 backdrop-blur-md">
+                      <span className="text-2xl font-bold text-slate-900">15</span>
+                      <span className="text-[10px] font-semibold uppercase text-slate-400">
+                        Tasks
+                      </span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex justify-around border-t border-slate-100 pt-3 text-xs font-semibold text-slate-600">
-                  <span className="flex items-center gap-1.5">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#106fb8]" />
-                    Completed
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="h-2.5 w-2.5 rounded-full bg-sky-400" />
-                    Ongoing
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-                    To Do
-                  </span>
+                  <div className="ml-4 flex w-40 flex-col gap-2 text-sm">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="h-3 w-3 rounded-full bg-[#16a34a]" />
+                        <span className="text-xs text-slate-600">Low</span>
+                      </div>
+                      <span className="text-xs text-slate-700 font-semibold">2</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="h-3 w-3 rounded-full bg-[#f59e0b]" />
+                        <span className="text-xs text-slate-600">Medium</span>
+                      </div>
+                      <span className="text-xs text-slate-700 font-semibold">5</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="h-3 w-3 rounded-full bg-[#fb923c]" />
+                        <span className="text-xs text-slate-600">High</span>
+                      </div>
+                      <span className="text-xs text-slate-700 font-semibold">5</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="h-3 w-3 rounded-full bg-[#ef4444]" />
+                        <span className="text-xs text-slate-600">Critical</span>
+                      </div>
+                      <span className="text-xs text-slate-700 font-semibold">3</span>
+                    </div>
+                  </div>
                 </div>
               </section>
             </div>
