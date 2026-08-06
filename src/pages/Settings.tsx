@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Settings as User, Bell, Shield, CheckCircle2, AlertCircle, Camera, Save, Key } from 'lucide-react';
 
 type Tab = 'profile' | 'notifications' | 'security';
@@ -22,17 +22,37 @@ type SecuritySettings = {
   confirmPassword: string;
 };
 
-export default function Settings() {
+type SettingsProps = {
+  currentUser: { name: string; role?: string };
+};
+
+export default function Settings({ currentUser }: SettingsProps) {
   const [activeTab, setActiveTab] = useState<Tab>('profile');
   const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
+  const defaultProfile: ProfileSettings = {
+    fullName: currentUser.name,
+    role: currentUser.role ?? 'Member',
+    email:
+      currentUser.role === 'Admin'
+        ? 'admin@cybence.com'
+        : `${currentUser.name.toLowerCase().replace(/\s+/g, '.')}@cybence.com`,
+    department: currentUser.role === 'Admin' ? 'Administration' : 'Operations & Scheduling',
+  };
+
+  const initials = currentUser.name
+    .split(' ')
+    .map((part) => part[0] ?? '')
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
   // Form States
-  const [profile, setProfile] = useState<ProfileSettings>({
-    fullName: 'Daniel Sardalla',
-    role: 'Intern',
-    email: 'daniel.sardalla@cybence.com',
-    department: 'Development',
-  });
+  const [profile, setProfile] = useState<ProfileSettings>(defaultProfile);
+
+  useEffect(() => {
+    setProfile(defaultProfile);
+  }, [currentUser]);
 
   const [notifications, setNotifications] = useState<NotificationSettings>({
     push: false,
@@ -156,7 +176,7 @@ export default function Settings() {
               {/* Avatar Section */}
               <div className="flex items-center gap-5 p-4 rounded-xl bg-slate-50/70 border border-slate-100">
                 <div className="w-16 h-16 rounded-2xl bg-[#106fb8] text-white flex items-center justify-center font-bold text-xl shadow-md shadow-[#106fb8]/20">
-                  DS
+                  {initials}
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-800">User Avatar</h3>

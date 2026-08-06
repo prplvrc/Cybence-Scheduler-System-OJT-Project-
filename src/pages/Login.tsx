@@ -4,8 +4,13 @@ import { User, Lock, Eye, EyeOff, AlertCircle, ArrowLeft, Mail } from "lucide-re
 import logo from "../assets/cybence-logo.png";
 
 type LoginProps = {
-  onLoginSuccess: () => void;
+  onLoginSuccess: (user: { id: string; name: string; role: string }) => void;
 };
+
+const KNOWN_USERS = [
+  { username: "admin", password: "admin123", id: "admin", name: "Administrator", role: "Admin" },
+  { username: "user", password: "user123", id: "u1", name: "Daniel Sardalla", role: "Intern" },
+];
 
 export default function Login({ onLoginSuccess }: LoginProps) {
   const [username, setUsername] = useState("admin");
@@ -34,9 +39,15 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     setError(null);
 
     window.setTimeout(() => {
-      if (username.trim() === "admin" && password === "admin123") {
+      const matchedUser = KNOWN_USERS.find(
+        (user) =>
+          user.username.trim().toLowerCase() === username.trim().toLowerCase() &&
+          user.password === password
+      );
+
+      if (matchedUser) {
         setIsLoading(false);
-        onLoginSuccess();
+        onLoginSuccess({ id: matchedUser.id, name: matchedUser.name, role: matchedUser.role });
         return;
       }
 
@@ -182,21 +193,32 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             </div>
 
             {/* Demo Hint Banner */}
-            <div className="flex items-center justify-between rounded-xl border border-sky-100 bg-sky-50/80 px-3 py-2 text-[11px] text-slate-600">
-              <div>
-                <span className="font-semibold text-slate-800">Demo login:</span> admin / admin123
+            <div className="rounded-xl border border-sky-100 bg-sky-50/80 p-3 text-[11px] text-slate-600">
+              <div className="font-semibold text-slate-800">Demo logins:</div>
+              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUsername("admin");
+                    setPassword("admin123");
+                    clearError();
+                  }}
+                  className="rounded-xl bg-white px-3 py-2 text-left text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-100"
+                >
+                  admin / admin123
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUsername("user");
+                    setPassword("user123");
+                    clearError();
+                  }}
+                  className="rounded-xl bg-white px-3 py-2 text-left text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-100"
+                >
+                  user / user123
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setUsername("admin");
-                  setPassword("admin123");
-                  clearError();
-                }}
-                className="font-semibold text-[#106fb8] hover:underline cursor-pointer"
-              >
-                Fill demo
-              </button>
             </div>
 
             {/* Submit */}

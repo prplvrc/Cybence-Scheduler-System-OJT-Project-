@@ -14,26 +14,41 @@ import {
   CheckCircle2,
   Menu,
   X,
+  Logs,
 } from "lucide-react";
 import ProfilePage from "./Profile_Page";
 import CalendarPage from "./Calendar";
 import TaskBoard from "./Task_Board";
 import RequestsPage from "./Requests";
 import SettingsPage from "./Settings";
+import AuditLogs from "./AuditLogs";
 import NewTaskModal from "./New_Task";
 import { type Task } from "./Task_Board";
 import { initialTaskGroups } from "./Task_Data";
+
+type DashboardPage =
+  | "dashboard"
+  | "tasks"
+  | "calendar"
+  | "requests"
+  | "settings"
+  | "profile"
+  | "audit";
 
 type DashboardProps = {
   onLogout: () => void;
   highlightedTaskId?: number | null;
   onTaskHighlightHandled?: () => void;
+  currentUser: { id: string; name: string; role?: string };
+  auditLogs: import("./AuditLogs").AuditEntry[];
 };
 
 export default function Dashboard({
   onLogout,
   highlightedTaskId,
   onTaskHighlightHandled,
+  currentUser,
+  auditLogs,
 }: DashboardProps) {
   const weeklyData = [
     { day: "Mon", value: 4 },
@@ -232,6 +247,17 @@ export default function Dashboard({
                     setIsMobileMenuOpen(false);
                   }}
                 />
+                {currentUser.role === "Admin" && (
+                  <SidebarItem
+                    icon={<Logs size={18} />}
+                    label="Audit Logs"
+                    active={currentTab === "audit"}
+                    onClick={() => {
+                      setActiveTab("audit");
+                      setIsMobileMenuOpen(false);
+                    }}
+                  />
+                )}
                 <SidebarItem
                   icon={<LogOut size={18} />}
                   label="Logout"
@@ -255,13 +281,18 @@ export default function Dashboard({
           className="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 p-3.5 transition-colors hover:bg-slate-100/80"
         >
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#106fb8]/10 text-sm font-bold text-[#106fb8]">
-            DS
+            {currentUser.name
+              .split(" ")
+              .map((word) => word[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase()}
           </div>
           <div className="overflow-hidden">
             <p className="truncate text-sm font-semibold text-slate-800">
-              Daniel Sardalla
+              {currentUser.name}
             </p>
-            <p className="truncate text-xs text-slate-500">Intern • Active</p>
+            <p className="truncate text-xs text-slate-500">{currentUser.role ?? "Member"} • Active</p>
           </div>
         </div>
       </aside>
@@ -273,12 +304,12 @@ export default function Dashboard({
         }`}
       >
         {activeTab === "profile" ? (
-          <ProfilePage />
+          <ProfilePage currentUser={currentUser} />
         ) : activeTab === "calendar" ? (
           <CalendarPage
             tasks={tasks}
             onTasksChange={setTasks}
-            currentUserName="Perpaulo"
+            currentUserName={currentUser.name}
           />
         ) : activeTab === "tasks" ? (
           <TaskBoard
@@ -288,9 +319,11 @@ export default function Dashboard({
             onHighlightHandled={onTaskHighlightHandled}
           />
         ) : activeTab === "requests" ? (
-          <RequestsPage />
+          <RequestsPage currentUser={currentUser} />
         ) : activeTab === "settings" ? (
-          <SettingsPage />
+          <SettingsPage currentUser={currentUser} />
+        ) : activeTab === "audit" ? (
+          <AuditLogs logs={auditLogs} />
         ) : (
           <>
             {/* HEADER BAR */}
@@ -310,7 +343,7 @@ export default function Dashboard({
                   </button>
                   <div>
                     <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-                      {greeting}, Daniel! 👋
+                      {greeting}, {currentUser.name.split(" ")[0]}! 👋
                     </h1>
                     <p className="text-sm text-slate-500 font-medium">
                       Here is what's happening with your workspace today.

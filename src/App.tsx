@@ -3,33 +3,26 @@ import { MessageSquare } from "lucide-react";
 import "./App.css";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import ProfilePage from "./pages/Profile_Page";
-import Calendar from "./pages/Calendar";
 import CommunicationCenter, {
   type AppMessage,
   type AppNotification,
   type AppUser,
 } from "./pages/CommunicationCenter";
+import type { AuditEntry } from "./pages/AuditLogs";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentPage, setCurrentPage] = useState<
-    "login" | "dashboard" | "profile" | "calendar"
-  >("login");
   const [isCommOpen, setIsCommOpen] = useState(false);
   const [highlightedTaskId, setHighlightedTaskId] = useState<number | null>(null);
-  const currentUser: AppUser = {
-    id: "u1",
-    name: "Daniel Sardalla",
-    role: "Intern",
-  };
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
+  const [auditLogs, setAuditLogs] = useState<AuditEntry[]>([]);
   const [messages, setMessages] = useState<AppMessage[]>([
     {
       id: "m1",
       senderId: "u2",
       recipientId: "u1",
       type: "message",
-      content: "Hey Daniel, please review the Cybence scheduler tasks.",
+      content: "Please review the Cybence scheduler tasks.",
       read: false,
       timestamp: new Date().toISOString(),
     },
@@ -57,6 +50,7 @@ function App() {
   ]);
 
   const handleSendMessage = (recipientId: string, content: string) => {
+    if (!currentUser) return;
     setMessages((prev) => [
       {
         id: `m_${Date.now()}`,
@@ -81,44 +75,59 @@ function App() {
   };
 
   const unreadCount =
-    messages.filter((message) => message.recipientId === currentUser.id && !message.read).length +
-    notifications.filter((notification) => notification.userId === currentUser.id && !notification.read).length;
+    messages.filter((message) => message.recipientId === currentUser?.id && !message.read).length +
+    notifications.filter((notification) => notification.userId === currentUser?.id && !notification.read).length;
+
+  const handleLoginSuccess = (user: AppUser) => {
+    setCurrentUser(user);
+    setIsLoggedIn(true);
+    setAuditLogs((prev) => [
+      {
+        id: `a_${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user: user.name,
+        action: "User Login",
+        entity: "User",
+        details: `Login as ${user.name}`,
+      },
+      ...prev,
+    ]);
+  };
 
   const handleLogout = () => {
+    if (currentUser) {
+      setAuditLogs((prev) => [
+        {
+          id: `a_${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          user: currentUser.name,
+          action: "User Logout",
+          entity: "User",
+          details: `Signed out ${currentUser.name}`,
+        },
+        ...prev,
+      ]);
+    }
+
     setIsLoggedIn(false);
-    setCurrentPage("login");
     setIsCommOpen(false);
     setHighlightedTaskId(null);
+    setCurrentUser(null);
   };
 
-  if (!isLoggedIn) {
-    return (
-      <Login
-        onLoginSuccess={() => {
-          setIsLoggedIn(true);
-          setCurrentPage("dashboard");
-        }}
-      />
-    );
+  if (!isLoggedIn || !currentUser) {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
   }
 
-  const renderCurrentPage = () => {
-    if (currentPage === "dashboard") {
-      return (
-        <Dashboard
-          onLogout={handleLogout}
-          highlightedTaskId={highlightedTaskId}
-          onTaskHighlightHandled={() => setHighlightedTaskId(null)}
-        />
-      );
-    }
-
-    if (currentPage === "calendar") {
-      return <Calendar />;
-    }
-
-    return <ProfilePage />;
-  };
+  const renderCurrentPage = () => (
+    <Dashboard
+      onLogout={handleLogout}
+      highlightedTaskId={highlightedTaskId}
+      onTaskHighlightHandled={() => setHighlightedTaskId(null)}
+      currentUser={currentUser}
+      auditLogs={auditLogs}
+    />
+  );
 
   return (
     <div className="app-shell relative min-h-screen">

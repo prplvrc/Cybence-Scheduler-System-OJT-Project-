@@ -29,7 +29,7 @@ const formatDate = (value: string) => {
 export default function Calendar({
   tasks = [],
   onTasksChange = () => undefined,
-  currentUserName = "Perpaulo",
+  currentUserName = "User",
 }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(new Date().getDate());

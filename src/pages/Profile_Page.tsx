@@ -21,14 +21,32 @@ type ProfileFormState = {
   department: string;
 };
 
-const initialProfile: ProfileFormState = {
-  name: "Daniel Sardalla",
-  title: "Intern • Cybence Operations",
-  about:
-    "Daniel is responsible for organizing schedules, ensuring smooth coordination across teams, and maintaining reliable communication with clients. He enjoys creating order out of busy workflows and helping others stay on track.",
-  email: "daniel.sardalla@cybence.com",
-  phone: "+63 912 345 6789",
-  department: "Operations & Scheduling",
+type ProfilePageProps = {
+  currentUser: { id: string; name: string; role?: string };
+};
+
+const getInitialProfile = (currentUser: ProfilePageProps['currentUser']): ProfileFormState => {
+  if (currentUser.role === 'Admin') {
+    return {
+      name: currentUser.name,
+      title: 'Administrator • Cybence IT Solutions',
+      about:
+        'As system administrator, this account manages users, audits logs, and monitors operations across the scheduler platform.',
+      email: 'admin@cybence.com',
+      phone: '+63 900 123 4567',
+      department: 'Administration',
+    };
+  }
+
+  return {
+    name: currentUser.name,
+    title: 'Intern • Cybence Operations',
+    about:
+      `${currentUser.name} is responsible for organizing schedules, ensuring smooth coordination across teams, and maintaining reliable communication with clients. They enjoy creating order out of busy workflows and helping others stay on track.`,
+    email: `${currentUser.name.toLowerCase().replace(/\s+/g, '.')}@cybence.com`,
+    phone: '+63 912 345 6789',
+    department: 'Operations & Scheduling',
+  };
 };
 
 const stats = [
@@ -37,10 +55,14 @@ const stats = [
   { label: "Upcoming Tasks", value: "4" },
 ];
 
-export default function ProfilePage() {
+export default function ProfilePage({ currentUser }: ProfilePageProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState<ProfileFormState>(initialProfile);
+  const [profileData, setProfileData] = useState<ProfileFormState>(() => getInitialProfile(currentUser));
   const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setProfileData(getInitialProfile(currentUser));
+  }, [currentUser]);
 
   useEffect(() => {
     return () => {
@@ -77,7 +99,7 @@ export default function ProfilePage() {
   };
 
   const handleCancel = () => {
-    setProfileData(initialProfile);
+    setProfileData(getInitialProfile(currentUser));
     setProfileImage(null);
     setIsEditing(false);
   };
