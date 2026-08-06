@@ -116,14 +116,14 @@ export default function Dashboard({
 
     let revealValue = 0;
     const interval = window.setInterval(() => {
-      revealValue += 6;
+      revealValue += 18;
       if (revealValue >= 360) {
         setPieReveal(360);
         window.clearInterval(interval);
       } else {
         setPieReveal(revealValue);
       }
-    }, 50);
+    }, 20);
 
     return () => window.clearInterval(interval);
   }, [chartLoaded]);
