@@ -98,7 +98,10 @@ export default function CommunicationCenter({
   const [tab, setTab] = useState<CommTab>("inbox");
   const [composeTo, setComposeTo] = useState("");
   const [composeContent, setComposeContent] = useState("");
+  const [replyContent, setReplyContent] = useState("");
   const [showCompose, setShowCompose] = useState(false);
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const [localReplies, setLocalReplies] = useState<Record<string, AppMessage[]>>({});
 
   const inbox = messages.filter(
     (m) => m.recipientId === currentUser.id && m.type === "message"
@@ -120,6 +123,40 @@ export default function CommunicationCenter({
     notifications: myNotifs.filter((n) => !n.read).length,
   };
 
+  const conversationMap = inbox.reduce<Record<string, { sender: AppUser; messages: AppMessage[] }>>(
+    (acc, message) => {
+      const sender = getUserById(message.senderId) ?? {
+        id: message.senderId,
+        name: "Unknown",
+      };
+      if (!acc[message.senderId]) {
+        acc[message.senderId] = { sender, messages: [] };
+      }
+      acc[message.senderId].messages.push(message);
+      return acc;
+    },
+    {}
+  );
+
+  const conversations = Object.values(conversationMap).map((conversation) => ({
+    ...conversation,
+    messages: conversation.messages.sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    ),
+  }));
+
+  const selectedConversation = selectedConversationId
+    ? conversations.find((c) => c.sender.id === selectedConversationId) ?? null
+    : conversations[0] ?? null;
+
+  const selectedSender = selectedConversation?.sender ?? null;
+
+  React.useEffect(() => {
+    if (tab === "inbox" && !selectedConversationId && conversations.length > 0) {
+      setSelectedConversationId(conversations[0].sender.id);
+    }
+  }, [tab, conversations, selectedConversationId]);
+
   const MessageRow = ({ msg }: { msg: AppMessage }) => {
     const sender = getUserById(msg.senderId);
     return (
@@ -128,7 +165,11 @@ export default function CommunicationCenter({
           "p-3 rounded-xl cursor-pointer transition-all hover:bg-slate-50 border",
           msg.read ? "border-transparent" : "border-blue-100 bg-blue-50/30"
         )}
-        onClick={() => onMarkRead(msg.id)}
+        onClick={() => {
+          onMarkRead(msg.id);
+          setSelectedConversationId(msg.senderId);
+          setTab("inbox");
+        }}
       >
         <div className="flex items-start gap-2.5">
           <AvatarEl user={sender} size="xs" />
@@ -210,13 +251,38 @@ export default function CommunicationCenter({
     setShowCompose(false);
   };
 
+  const handleReply = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedConversation || !replyContent.trim()) return;
+
+    const replyMessage: AppMessage = {
+      id: `reply-${selectedConversation.sender.id}-${Date.now()}`,
+      senderId: currentUser.id,
+      recipientId: selectedConversation.sender.id,
+      type: "message",
+      content: replyContent.trim(),
+      read: true,
+      timestamp: new Date().toISOString(),
+    };
+
+    onSend(selectedConversation.sender.id, replyContent.trim());
+    setLocalReplies((prev) => ({
+      ...prev,
+      [selectedConversation.sender.id]: [
+        ...(prev[selectedConversation.sender.id] ?? []),
+        replyMessage,
+      ],
+    }));
+    setReplyContent("");
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div
         className="absolute inset-0 bg-black/30 backdrop-blur-xs"
         onClick={onClose}
       />
-      <div className="relative bg-white w-full sm:w-105 sm:max-w-full sm:h-150 h-[85vh] rounded-t-2xl sm:rounded-2xl shadow-2xl shadow-slate-900/20 flex flex-col z-10 overflow-hidden">
+      <div className="relative bg-white w-full max-w-[1180px] h-[94vh] rounded-t-2xl sm:rounded-2xl shadow-2xl shadow-slate-900/20 flex flex-col z-10 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 shrink-0">
           <h2 className="font-semibold text-slate-800 flex items-center gap-2">
@@ -301,21 +367,150 @@ export default function CommunicationCenter({
         </div>
 
         {/* Content */}
-        <div
-          className="flex-1 overflow-y-auto p-3 space-y-2"
-          style={{ scrollbarWidth: "thin" }}
-        >
+        <div className="flex-1 overflow-hidden p-3" style={{ scrollbarWidth: "thin" }}>
           {tab === "inbox" && (
-            <>
-              {inbox.length === 0 && (
-                <div className="text-center py-10 text-slate-400 text-sm">
-                  No messages
+            <div className="flex h-full min-h-0 flex-col gap-4 xl:flex-row xl:items-stretch">
+              <div className="flex min-h-0 flex-col rounded-3xl border border-slate-200 bg-slate-50 overflow-hidden xl:w-[340px] xl:min-h-full">
+                <div className="px-4 py-3 border-b border-slate-200 bg-white">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    Conversations
+                  </p>
                 </div>
-              )}
-              {inbox.map((m) => (
-                <MessageRow key={m.id} msg={m} />
-              ))}
-            </>
+                <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                  {conversations.length === 0 ? (
+                    <div className="text-center py-10 text-slate-400 text-sm">
+                      No messages
+                    </div>
+                  ) : (
+                    conversations.map((conversation) => {
+                      const isActive = selectedConversationId === conversation.sender.id;
+                      const latest = conversation.messages[conversation.messages.length - 1];
+                      const unreadCount = conversation.messages.filter((m) => !m.read).length;
+                      return (
+                        <button
+                          key={conversation.sender.id}
+                          onClick={() => {
+                            conversation.messages
+                              .filter((m) => !m.read)
+                              .forEach((m) => onMarkRead(m.id));
+                            setSelectedConversationId(conversation.sender.id);
+                          }}
+                          className={cn(
+                            "w-full text-left rounded-2xl p-3 transition-all border flex items-start gap-3",
+                            isActive
+                              ? "border-[#106fb8] bg-white shadow-sm"
+                              : "border-transparent hover:bg-white"
+                          )}
+                        >
+                          <AvatarEl user={conversation.sender} />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-sm font-semibold text-slate-900 truncate">
+                                {conversation.sender.name}
+                              </p>
+                              <span className="text-[10px] text-slate-400">
+                                {formatRelative(latest.timestamp)}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-600 mt-1 line-clamp-2">
+                              {latest.content}
+                            </p>
+                          </div>
+                          {unreadCount > 0 && (
+                            <span className="min-w-[1.35rem] rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-semibold text-white text-center">
+                              {unreadCount}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              <div className="flex min-h-0 flex-1 flex-col rounded-3xl border border-slate-200 bg-white overflow-hidden xl:min-h-full">
+                {selectedConversation ? (
+                  <>
+                    <div className="flex items-start justify-between gap-3 border-b border-slate-200 p-4">
+                      <div className="flex items-center gap-3">
+                        <AvatarEl user={selectedSender ?? undefined} />
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">
+                            {selectedSender?.name || "Unknown sender"}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {selectedConversation.messages.length} messages
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                        {selectedConversation.messages.map((message) => (
+                          <div key={message.id} className="flex flex-col">
+                            <div
+                              className={cn(
+                                "inline-block max-w-[70%] rounded-[20px] p-3 text-sm",
+                                message.senderId === currentUser.id
+                                  ? "self-end bg-[#106fb8] text-white rounded-tr-[4px] rounded-bl-[20px] rounded-br-[20px]"
+                                  : "self-start bg-slate-100 text-slate-700 rounded-tl-[4px] rounded-br-[20px] rounded-bl-[20px]"
+                              )}
+                            >
+                              {message.content}
+                            </div>
+                            <span className="mt-1 text-[10px] text-slate-400">
+                              {formatRelative(message.timestamp)}
+                            </span>
+                          </div>
+                        ))}
+                        {(localReplies[selectedConversation.sender.id] ?? []).map((message) => (
+                          <div key={message.id} className="flex flex-col self-end">
+                            <div className="inline-block max-w-[70%] rounded-[20px] bg-[#106fb8] p-3 text-sm text-white rounded-tr-[4px] rounded-bl-[20px] rounded-br-[20px]">
+                              {message.content}
+                            </div>
+                            <span className="mt-1 text-[10px] text-slate-400 self-end">
+                              {formatRelative(message.timestamp)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="border-t border-slate-200 p-4">
+                        <form onSubmit={handleReply} className="space-y-3">
+                          <div className="rounded-3xl border border-slate-200 p-4">
+                            <textarea
+                              value={replyContent}
+                              onChange={(e) => setReplyContent(e.target.value)}
+                              rows={4}
+                              placeholder={`Reply to ${selectedSender?.name}`}
+                              className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#106fb8]/20 focus:border-[#106fb8]"
+                            />
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedConversationId(null)}
+                              className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
+                            >
+                              Close
+                            </button>
+                            <button
+                              type="submit"
+                              className="rounded-2xl bg-[#106fb8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d5d9e] transition-colors"
+                            >
+                              Send Reply
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex h-full min-h-[200px] items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500">
+                    Select a conversation from the left to view the messages.
+                  </div>
+                )}
+              </div>
+            </div>
           )}
           {tab === "remarks" && (
             <>
