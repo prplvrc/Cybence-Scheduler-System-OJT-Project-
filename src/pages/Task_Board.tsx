@@ -19,7 +19,7 @@ import type { NewTaskFormData } from "./New_Task";
 import "./Task_Board.css";
 
 export interface Task {
-  id: number;
+  id: string | number;
   task: string;
   description?: string;
   creator: string;
@@ -49,16 +49,12 @@ type TaskBoardProps = {
   onTasksChange: (tasks: Task[]) => void;
   highlightTaskId?: number | null;
   onHighlightHandled?: () => void;
+  currentUser?: { id: string; name: string; role?: string };
 };
 
 const PRIORITIES = ["Low", "Medium", "High", "Critical"];
 const ALL_STATUSES = ["To Be Assigned", "To Do", "Ongoing", "Completed", "Unfinished"];
-// Status options selectable by user when manually updating a task's status
 const UPDATE_STATUS_OPTIONS = ["To Do", "Ongoing", "Completed"];
-
-/**
- * Computes effective status dynamically based on due date for overdue tasks.
- */
 
 function getEffectiveStatus(task: Task): string {
   if (task.status === "Completed") {
@@ -137,7 +133,13 @@ const buildTaskGroups = (tasks: Task[]): TaskGroup[] => {
   return Object.values(groupMap);
 };
 
-export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHighlightHandled }: TaskBoardProps) {
+export default function TaskBoard({
+  tasks,
+  onTasksChange,
+  highlightTaskId,
+  onHighlightHandled,
+  currentUser,
+}: TaskBoardProps) {
   const [filter, setFilter] = useState<FilterState>({
     search: "",
     priorities: [],
@@ -147,7 +149,6 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -171,10 +172,7 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
   }, [highlightTaskId, onHighlightHandled]);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -227,41 +225,78 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
 
   const taskGroups = buildTaskGroups(filteredTasks);
 
-  const handleCreateTask = (taskData: NewTaskFormData) => {
+  const handleCreateTask = async (taskData: NewTaskFormData) => {
     const isOpenForAnyone = taskData.assignTo === "Open for anyone to take";
     const initialStatus = isOpenForAnyone ? "To Be Assigned" : "To Do";
 
-    const newTask: Task = {
-      id: Date.now(),
-      task: taskData.title,
-      description: taskData.description || "",
-      creator: "You",
-      assignedTo: isOpenForAnyone ? "Open" : taskData.assignTo,
-      createdOn: new Date().toISOString().split("T")[0],
-      status: taskData.status || initialStatus,
-      dueDate: taskData.dueDate || new Date().toISOString().split("T")[0],
-      priority: taskData.priority || "Medium",
-    };
+    try {
+      const response = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          task: taskData.title,
+          description: taskData.description || "",
+          creator: currentUser?.name || "You",
+          assignedTo: isOpenForAnyone ? "Open" : taskData.assignTo,
+          status: taskData.status || initialStatus,
+          dueDate: taskData.dueDate || new Date().toISOString().split("T")[0],
+          priority: taskData.priority || "Medium",
+        }),
+      });
 
-    onTasksChange([...tasks, newTask]);
-    setIsModalOpen(false);
-  };
-
-  const handleUpdateTaskStatus = (taskId: number, newStatus: string) => {
-    const updated = tasks.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t));
-    onTasksChange(updated);
-    if (selectedTask?.id === taskId) {
-      setSelectedTask((prev) => (prev ? { ...prev, status: newStatus } : null));
+      if (response.ok) {
+        const createdTask: Task = await response.json();
+        onTasksChange([...tasks, createdTask]);
+      }
+    } catch (err) {
+      console.error("Error creating task:", err);
+    } finally {
+      setIsModalOpen(false);
     }
   };
 
-  const handleTakeTask = (taskId: number) => {
-    const updated = tasks.map((t) =>
-      t.id === taskId ? { ...t, assignedTo: "You", status: "To Do" } : t
-    );
-    onTasksChange(updated);
-    if (selectedTask?.id === taskId) {
-      setSelectedTask((prev) => (prev ? { ...prev, assignedTo: "You", status: "To Do" } : null));
+  const handleUpdateTaskStatus = async (taskId: string | number, newStatus: string) => {
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        const updated = tasks.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t));
+        onTasksChange(updated);
+        if (selectedTask?.id === taskId) {
+          setSelectedTask((prev) => (prev ? { ...prev, status: newStatus } : null));
+        }
+      }
+    } catch (err) {
+      console.error("Error updating task status:", err);
+    }
+  };
+
+  const handleTakeTask = async (taskId: string | number) => {
+    const assigneeName = currentUser?.name || "You";
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignedTo: assigneeName, status: "To Do" }),
+      });
+
+      if (response.ok) {
+        const updated = tasks.map((t) =>
+          t.id === taskId ? { ...t, assignedTo: assigneeName, status: "To Do" } : t
+        );
+        onTasksChange(updated);
+        if (selectedTask?.id === taskId) {
+          setSelectedTask((prev) =>
+            prev ? { ...prev, assignedTo: assigneeName, status: "To Do" } : null
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Error claiming task:", err);
     }
   };
 
@@ -281,10 +316,7 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
             <span className="time-str">{formattedTime}</span>
           </div>
 
-          <button 
-            className="btn-primary" 
-            onClick={() => setIsModalOpen(true)}
-          >
+          <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
             + New Task
           </button>
         </div>
@@ -300,7 +332,7 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
           >
             <SlidersHorizontal size={15} />
             <span>Filters</span>
-            
+
             {hasActiveFilters && (
               <span
                 role="button"
@@ -309,12 +341,6 @@ export default function TaskBoard({ tasks, onTasksChange, highlightTaskId, onHig
                 onClick={(e) => {
                   e.stopPropagation();
                   setFilter({ search: filter.search, priorities: [], statuses: [], sort: "desc" });
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.stopPropagation();
-                    setFilter({ search: filter.search, priorities: [], statuses: [], sort: "desc" });
-                  }
                 }}
                 className="clear-filter-icon"
               >
@@ -397,8 +423,8 @@ function TaskDetailsModal({
 }: {
   task: Task;
   onClose: () => void;
-  onStatusChange: (taskId: number, status: string) => void;
-  onTakeTask: (taskId: number) => void;
+  onStatusChange: (taskId: string | number, status: string) => void;
+  onTakeTask: (taskId: string | number) => void;
 }) {
   const effectiveStatus = getEffectiveStatus(task);
   const isUnassigned = effectiveStatus === "To Be Assigned";
@@ -406,18 +432,22 @@ function TaskDetailsModal({
   return (
     <div className="filter-modal-overlay">
       <div className="filter-modal-card max-w-lg w-full bg-white rounded-2xl p-6 shadow-xl space-y-5">
-        {/* Header */}
         <div className="flex items-start justify-between border-b border-slate-100 pb-4">
           <div className="space-y-1 pr-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#106fb8]">Task Details</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#106fb8]">
+              Task Details
+            </span>
             <h2 className="text-xl font-extrabold text-slate-900 leading-snug">{task.task}</h2>
           </div>
-          <button type="button" onClick={onClose} className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition">
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition"
+          >
             <X size={20} />
           </button>
         </div>
 
-        {/* Task Description */}
         <div className="p-3 bg-slate-50/60 rounded-xl border border-slate-100 space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-wide">
             <FileText className="w-3.5 h-3.5 text-[#106fb8]" /> Description
@@ -429,7 +459,6 @@ function TaskDetailsModal({
           </p>
         </div>
 
-        {/* Details Grid */}
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="flex items-center gap-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100">
             <User className="w-4 h-4 text-[#106fb8]" />
@@ -453,9 +482,13 @@ function TaskDetailsModal({
             <Tag className="w-4 h-4 text-[#106fb8]" />
             <div>
               <p className="text-xs text-slate-400 font-medium">Priority</p>
-              <span className={`inline-block text-xs font-bold px-2 py-0.5 rounded-full mt-0.5 ${
-                task.priority === 'High' || task.priority === 'Critical' ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-700'
-              }`}>
+              <span
+                className={`inline-block text-xs font-bold px-2 py-0.5 rounded-full mt-0.5 ${
+                  task.priority === "High" || task.priority === "Critical"
+                    ? "bg-amber-100 text-amber-800"
+                    : "bg-slate-200 text-slate-700"
+                }`}
+              >
                 {task.priority}
               </span>
             </div>
@@ -470,7 +503,6 @@ function TaskDetailsModal({
           </div>
         </div>
 
-        {/* Status Actions - Only displayed if the task is already assigned */}
         {!isUnassigned && (
           <div className="space-y-2 pt-1">
             <label className="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1.5">
@@ -490,7 +522,6 @@ function TaskDetailsModal({
           </div>
         )}
 
-        {/* Action Buttons */}
         <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
           {isUnassigned ? (
             <button
@@ -654,11 +685,7 @@ function TaskSection({
 
   return (
     <div className="task-group-card">
-      <button
-        onClick={() => setOpen(!open)}
-        className="group-header-btn"
-        type="button"
-      >
+      <button onClick={() => setOpen(!open)} className="group-header-btn" type="button">
         <div className="header-left">
           {open ? (
             <ChevronDown size={18} className="chevron" />
@@ -695,9 +722,7 @@ function TaskSection({
                     task.id === highlightTaskId ? "highlighted-task-row" : ""
                   }`}
                 >
-                  <td className="td-cell font-semibold text-slate-800">
-                    {task.task}
-                  </td>
+                  <td className="td-cell font-semibold text-slate-800">{task.task}</td>
                   <td className="td-cell text-slate-600">{task.creator}</td>
                   <td className="td-cell text-slate-600">{task.assignedTo}</td>
                   <td className="td-cell text-slate-500">{formatDate(task.createdOn)}</td>

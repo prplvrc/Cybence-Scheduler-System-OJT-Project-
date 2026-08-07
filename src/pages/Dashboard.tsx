@@ -24,7 +24,6 @@ import SettingsPage from "./Settings";
 import AuditLogs from "./AuditLogs";
 import NewTaskModal from "./New_Task";
 import { type Task } from "./Task_Board";
-import { initialTaskGroups } from "./Task_Data";
 
 type DashboardProps = {
   onLogout: () => void;
@@ -86,9 +85,18 @@ export default function Dashboard({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [chartLoaded, setChartLoaded] = useState(false);
   const [pieReveal, setPieReveal] = useState(0);
-  const [tasks, setTasks] = useState<Task[]>(() =>
-    initialTaskGroups.flatMap((group) => group.tasks)
-  );
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  // Fetch tasks from Express API on component mount
+  useEffect(() => {
+    fetch("/api/tasks")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch tasks");
+        return res.json();
+      })
+      .then((data: Task[]) => setTasks(data))
+      .catch((err) => console.error("Error loading tasks from server:", err));
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -96,9 +104,7 @@ export default function Dashboard({
   }, []);
 
   useEffect(() => {
-    // Trigger chart load animation when showing the dashboard tab
     if (activeTab !== "dashboard") {
-      // ensure charts are reset when leaving
       setChartLoaded(false);
       return;
     }
@@ -148,10 +154,35 @@ export default function Dashboard({
   });
 
   const pieRadius = 56;
-  const pieStroke = 18;
   const pieCircumference = 2 * Math.PI * pieRadius;
   const pieProgress = pieReveal / 360;
-  const pieStrokeDashoffset = pieCircumference * (1 - pieProgress);
+
+  const handleCreateTaskSubmit = async (taskData: any) => {
+    try {
+      const response = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          task: taskData.title || taskData.task,
+          description: taskData.description || "",
+          creator: currentUser.name,
+          assignedTo: taskData.assignTo || "Open",
+          status: taskData.status || "To Do",
+          dueDate: taskData.dueDate || new Date().toISOString().split("T")[0],
+          priority: taskData.priority || "Medium",
+        }),
+      });
+
+      if (response.ok) {
+        const createdTask: Task = await response.json();
+        setTasks((prev) => [...prev, createdTask]);
+      }
+    } catch (err) {
+      console.error("Error creating task:", err);
+    } finally {
+      setIsNewTaskOpen(false);
+    }
+  };
 
   return (
     <div className="relative flex h-screen w-screen overflow-hidden bg-slate-50">
@@ -349,6 +380,7 @@ export default function Dashboard({
             onTasksChange={setTasks}
             highlightTaskId={highlightedTaskId ?? null}
             onHighlightHandled={onTaskHighlightHandled}
+            currentUser={currentUser}
           />
         ) : activeTab === "requests" ? (
           <RequestsPage currentUser={currentUser} />
@@ -360,11 +392,9 @@ export default function Dashboard({
           <>
             {/* HEADER BAR */}
             <section className="relative overflow-hidden rounded-3xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
-              {/* GRADIENT ACCENT BAR */}
               <div className="absolute left-0 top-0 h-1 w-full rounded-t-3xl bg-linear-to-r from-sky-400 via-sky-500 to-[#106fb8] shadow-[0_2px_8px_rgba(16,111,184,0.3)]" />
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                {/* LEFT SIDE: Mobile Menu + Greeting */}
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
@@ -383,7 +413,6 @@ export default function Dashboard({
                   </div>
                 </div>
 
-                {/* RIGHT SIDE: Date & Time */}
                 <div className="flex items-center gap-4">
                   <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-500">
                     <span className="flex items-center gap-1.5">
@@ -402,28 +431,28 @@ export default function Dashboard({
             {/* STATS GRID */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard
-                value="10"
+                value={tasks.length.toString()}
                 title="Total Tasks"
                 subtitle="All works"
                 icon={<ListTodo className="h-5 w-5 text-[#106fb8]" />}
                 bg="bg-[#106fb8]/10"
               />
               <StatCard
-                value="2"
+                value={tasks.filter((t) => t.status === "To Do").length.toString()}
                 title="To Do"
                 subtitle="Not yet started"
                 icon={<Clock className="h-5 w-5 text-amber-600" />}
                 bg="bg-amber-50"
               />
               <StatCard
-                value="2"
+                value={tasks.filter((t) => t.status === "Ongoing").length.toString()}
                 title="Ongoing"
                 subtitle="Active works"
                 icon={<TrendingUp className="h-5 w-5 text-sky-600" />}
                 bg="bg-sky-50"
               />
               <StatCard
-                value="2"
+                value={tasks.filter((t) => t.status === "Completed").length.toString()}
                 title="Completed"
                 subtitle="Completed works"
                 icon={<CheckCircle2 className="h-5 w-5 text-emerald-600" />}
@@ -498,6 +527,7 @@ export default function Dashboard({
                 })()}
               </section>
 
+              {/* PRIORITY DISTRIBUTION DONUT CHART */}
               <section className="flex flex-col justify-between rounded-3xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900">
@@ -508,87 +538,109 @@ export default function Dashboard({
                   </p>
                 </div>
 
-                <div className="relative my-6 flex items-center justify-between gap-4">
-                  <div className="relative flex items-center gap-4">
-                    <svg
-                      className="h-40 w-40"
-                      viewBox="0 0 160 160"
-                      role="img"
-                      aria-label="Priority distribution donut chart"
-                    >
-                      <circle
-                        cx="80"
-                        cy="80"
-                        r="56"
-                        stroke="#e6eef7"
-                        strokeWidth={pieStroke}
-                        fill="none"
-                      />
-                      <circle
-                        cx="80"
-                        cy="80"
-                        r="56"
-                        stroke="url(#priorityGradient)"
-                        strokeWidth={pieStroke}
-                        fill="none"
-                        strokeLinecap="round"
-                        strokeDasharray={pieCircumference}
-                        strokeDashoffset={pieStrokeDashoffset}
-                        transform="rotate(-90 80 80)"
-                        style={{ transition: "stroke-dashoffset 0.6s ease-out" }}
-                      />
-                      <defs>
-                        <linearGradient id="priorityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#16a34a" />
-                          <stop offset="30%" stopColor="#f59e0b" />
-                          <stop offset="65%" stopColor="#fb923c" />
-                          <stop offset="100%" stopColor="#ef4444" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white/90 backdrop-blur-md">
-                      <span className="text-2xl font-bold text-slate-900">15</span>
-                      <span className="text-[10px] font-semibold uppercase text-slate-400">
+                <div className="my-6 flex flex-col items-center justify-around gap-6 sm:flex-row">
+                  <div className="relative flex shrink-0 items-center justify-center">
+                    {(() => {
+                      const priorities = [
+                        { label: "Low", value: tasks.filter((t) => t.priority === "Low").length, color: "#94a3b8" },
+                        { label: "Medium", value: tasks.filter((t) => t.priority === "Medium").length, color: "#38bdf8" },
+                        { label: "High", value: tasks.filter((t) => t.priority === "High").length, color: "#106fb8" },
+                        { label: "Critical", value: tasks.filter((t) => t.priority === "Critical").length, color: "#f59e0b" },
+                      ];
+
+                      const total = priorities.reduce((acc, p) => acc + p.value, 0) || 1;
+                      let accumulatedPercent = 0;
+
+                      return (
+                        <svg
+                          className="h-40 w-40 -rotate-90 transform"
+                          viewBox="0 0 160 160"
+                          role="img"
+                          aria-label="Priority distribution donut chart"
+                        >
+                          <circle
+                            cx="80"
+                            cy="80"
+                            r="56"
+                            stroke="#e2e8f0"
+                            strokeWidth={16}
+                            fill="none"
+                          />
+                          {priorities.map((item) => {
+                            const percentage = item.value / total;
+                            const dasharray = pieCircumference * percentage;
+                            const dashoffset = -(pieCircumference * accumulatedPercent);
+                            accumulatedPercent += percentage;
+
+                            return (
+                              <circle
+                                key={item.label}
+                                cx="80"
+                                cy="80"
+                                r="56"
+                                stroke={item.color}
+                                strokeWidth={16}
+                                fill="none"
+                                strokeDasharray={`${dasharray * pieProgress} ${
+                                  pieCircumference - dasharray * pieProgress
+                                }`}
+                                strokeDashoffset={dashoffset}
+                                className="transition-all duration-500 ease-out"
+                              />
+                            );
+                          })}
+                        </svg>
+                      );
+                    })()}
+
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                      <span className="text-2xl font-bold tracking-tight text-slate-900">
+                        {tasks.length}
+                      </span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                         Tasks
                       </span>
                     </div>
                   </div>
 
-                  <div className="ml-4 flex w-40 flex-col gap-2 text-sm">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="h-3 w-3 rounded-full bg-[#16a34a]" />
-                        <span className="text-xs text-slate-600">Low</span>
+                  <div className="flex w-full max-w-[180px] flex-col gap-2.5">
+                    <div className="flex items-center justify-between rounded-xl bg-slate-50/80 px-3 py-1.5 text-xs border border-slate-100">
+                      <div className="flex items-center gap-2.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-slate-400" />
+                        <span className="font-medium text-slate-600">Low</span>
                       </div>
-                      <span className="text-xs text-slate-700 font-semibold">2</span>
+                      <span className="font-semibold text-slate-800">{tasks.filter((t) => t.priority === "Low").length}</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="h-3 w-3 rounded-full bg-[#f59e0b]" />
-                        <span className="text-xs text-slate-600">Medium</span>
+
+                    <div className="flex items-center justify-between rounded-xl bg-slate-50/80 px-3 py-1.5 text-xs border border-slate-100">
+                      <div className="flex items-center gap-2.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-sky-400" />
+                        <span className="font-medium text-slate-600">Medium</span>
                       </div>
-                      <span className="text-xs text-slate-700 font-semibold">5</span>
+                      <span className="font-semibold text-slate-800">{tasks.filter((t) => t.priority === "Medium").length}</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="h-3 w-3 rounded-full bg-[#fb923c]" />
-                        <span className="text-xs text-slate-600">High</span>
+
+                    <div className="flex items-center justify-between rounded-xl bg-slate-50/80 px-3 py-1.5 text-xs border border-slate-100">
+                      <div className="flex items-center gap-2.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#106fb8]" />
+                        <span className="font-medium text-slate-600">High</span>
                       </div>
-                      <span className="text-xs text-slate-700 font-semibold">5</span>
+                      <span className="font-semibold text-slate-800">{tasks.filter((t) => t.priority === "High").length}</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="h-3 w-3 rounded-full bg-[#ef4444]" />
-                        <span className="text-xs text-slate-600">Critical</span>
+
+                    <div className="flex items-center justify-between rounded-xl bg-slate-50/80 px-3 py-1.5 text-xs border border-slate-100">
+                      <div className="flex items-center gap-2.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                        <span className="font-medium text-slate-600">Critical</span>
                       </div>
-                      <span className="text-xs text-slate-700 font-semibold">3</span>
+                      <span className="font-semibold text-slate-800">{tasks.filter((t) => t.priority === "Critical").length}</span>
                     </div>
                   </div>
                 </div>
               </section>
             </div>
 
-            {/* BOTTOM SECTION: RECENT TASKS & TEAM OVERVIEW */}
+            {/* RECENT TASKS & TEAM OVERVIEW */}
             <div className="grid gap-6 lg:grid-cols-2">
               <section className="flex h-full flex-col rounded-3xl border border-white/80 bg-white/85 p-6 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
                 <div className="mb-4 flex items-center justify-between">
@@ -664,14 +716,10 @@ export default function Dashboard({
         )}
       </main>
 
-      {/* NEW TASK MODAL */}
       <NewTaskModal
         isOpen={isNewTaskOpen}
         onClose={() => setIsNewTaskOpen(false)}
-        onSubmit={(taskData) => {
-          console.log("New task created:", taskData);
-          setIsNewTaskOpen(false);
-        }}
+        onSubmit={handleCreateTaskSubmit}
       />
     </div>
   );
