@@ -16,25 +16,27 @@ type NewTaskModalProps = {
   onSubmit: (taskData: NewTaskFormData) => void;
 };
 
-const teamMembers = [
-  "Sarah Chen",
-  "Daniel",
-  "Mae",
-  "Janina",
-  "Perpaulo",
-  "Open for anyone to take",
-];
+type User = {
+  id: number;
+  name: string;
+};
 
 const priorityOptions = ["Low", "Medium", "High", "Critical"];
 
-export default function NewTaskModal({ isOpen, onClose, onSubmit }: NewTaskModalProps) {
+export default function NewTaskModal({
+  isOpen,
+  onClose,
+  onSubmit,
+}: NewTaskModalProps) {
   const [formData, setFormData] = useState<Omit<NewTaskFormData, "status">>({
     title: "",
     description: "",
-    assignTo: "Sarah Chen",
+    assignTo: "",
     dueDate: "",
     priority: "Medium",
   });
+
+  const [users, setUsers] = useState<User[]>([]);
 
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -43,14 +45,56 @@ export default function NewTaskModal({ isOpen, onClose, onSubmit }: NewTaskModal
     setOpenDropdown(openDropdown === name ? null : name);
   };
 
+  // Load users from backend
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const response = await fetch("/api/users", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to load users");
+        }
+
+        const result = await response.json();
+
+        setUsers(result.users);
+
+        // Select the first user by default
+        if (result.users.length > 0) {
+          setFormData((prev) => ({
+            ...prev,
+            assignTo: String(result.users[0].id),
+          }));
+        }
+      } catch (error) {
+        console.error("Error loading users:", error);
+      }
+    };
+
+    if (isOpen) {
+      loadUsers();
+    }
+  }, [isOpen]);
+
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setOpenDropdown(null);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -70,19 +114,20 @@ export default function NewTaskModal({ isOpen, onClose, onSubmit }: NewTaskModal
       return;
     }
 
-    // Automatically set status based on assignment
-    const autoStatus =
-      formData.assignTo === "Open for anyone to take" ? "To Be Assigned" : "To Do";
+    if (!formData.assignTo) {
+      alert("Please select a user.");
+      return;
+    }
 
     onSubmit({
       ...formData,
-      status: autoStatus,
+      status: "Pending",
     });
 
     setFormData({
       title: "",
       description: "",
-      assignTo: "Sarah Chen",
+      assignTo: users.length > 0 ? String(users[0].id) : "",
       dueDate: "",
       priority: "Medium",
     });
@@ -207,9 +252,34 @@ export default function NewTaskModal({ isOpen, onClose, onSubmit }: NewTaskModal
           </div>
 
           {/* Row 1: Assign To & Priority */}
+{/* Row 1 */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {renderCustomSelect("Assign To", "assignTo", teamMembers)}
+
+            <div className="group">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                Assign To
+              </label>
+
+              <select
+                value={formData.assignTo}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    assignTo: e.target.value,
+                  }))
+                }
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs"
+              >
+                {users.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {renderCustomSelect("Priority", "priority", priorityOptions)}
+
           </div>
 
           {/* Row 2: Due Date */}

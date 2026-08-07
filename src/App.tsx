@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MessageSquare } from "lucide-react";
 import "./App.css";
 import Login from "./pages/Login";
@@ -11,10 +11,20 @@ import CommunicationCenter, {
 import type { AuditEntry } from "./pages/AuditLogs";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+  return !!localStorage.getItem("token");
+});
   const [isCommOpen, setIsCommOpen] = useState(false);
   const [highlightedTaskId, setHighlightedTaskId] = useState<number | null>(null);
   const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
+
+useEffect(() => {
+  const storedUser = localStorage.getItem("user");
+
+  if (storedUser) {
+    setCurrentUser(JSON.parse(storedUser));
+  }
+}, []);
   const [auditLogs, setAuditLogs] = useState<AuditEntry[]>([]);
   const [messages, setMessages] = useState<AppMessage[]>([
     {
@@ -108,6 +118,9 @@ function App() {
         ...prev,
       ]);
     }
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
     setIsLoggedIn(false);
     setIsCommOpen(false);

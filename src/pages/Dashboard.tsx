@@ -88,15 +88,31 @@ export default function Dashboard({
   const [tasks, setTasks] = useState<Task[]>([]);
 
   // Fetch tasks from Express API on component mount
-  useEffect(() => {
-    fetch("/api/tasks")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch tasks");
-        return res.json();
-      })
-      .then((data: Task[]) => setTasks(data))
-      .catch((err) => console.error("Error loading tasks from server:", err));
-  }, []);
+    useEffect(() => {
+      const loadTasks = async () => {
+        try {
+          const token = localStorage.getItem("token");
+
+          const response = await fetch("/api/tasks", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch tasks");
+          }
+
+          const result = await response.json();
+
+          setTasks(result.tasks);
+        } catch (error) {
+          console.error("Error loading tasks:", error);
+        }
+      };
+
+      loadTasks();
+    }, []);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -157,32 +173,40 @@ export default function Dashboard({
   const pieCircumference = 2 * Math.PI * pieRadius;
   const pieProgress = pieReveal / 360;
 
-  const handleCreateTaskSubmit = async (taskData: any) => {
-    try {
-      const response = await fetch("/api/tasks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          task: taskData.title || taskData.task,
-          description: taskData.description || "",
-          creator: currentUser.name,
-          assignedTo: taskData.assignTo || "Open",
-          status: taskData.status || "To Do",
-          dueDate: taskData.dueDate || new Date().toISOString().split("T")[0],
-          priority: taskData.priority || "Medium",
-        }),
-      });
+const handleCreateTaskSubmit = async (taskData: any) => {
+  try {
+    const token = localStorage.getItem("token");
 
-      if (response.ok) {
-        const createdTask: Task = await response.json();
-        setTasks((prev) => [...prev, createdTask]);
-      }
-    } catch (err) {
-      console.error("Error creating task:", err);
-    } finally {
-      setIsNewTaskOpen(false);
+    const response = await fetch("/api/tasks", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        title: taskData.title,
+        description: taskData.description,
+        status: taskData.status || "Pending",
+        priority: taskData.priority || "Medium",
+        dueDate: taskData.dueDate || null,
+        assignedTo: Number(taskData.assignTo),
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to create task");
     }
-  };
+
+    const result = await response.json();
+
+    setTasks((prev) => [result.task, ...prev]);
+  } catch (error) {
+    console.error("Error creating task:", error);
+  } finally {
+    setIsNewTaskOpen(false);
+  }
+};
 
   return (
     <div className="relative flex h-screen w-screen overflow-hidden bg-slate-50">

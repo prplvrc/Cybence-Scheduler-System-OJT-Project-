@@ -1,20 +1,16 @@
 import { useState, useRef, useEffect } from "react";
 import type { FormEvent } from "react";
 import { User, Lock, Eye, EyeOff, AlertCircle, ArrowLeft, Mail } from "lucide-react";
+import { login } from "../api/auth.api";
 import logo from "../assets/cybence-logo.png";
 
 type LoginProps = {
   onLoginSuccess: (user: { id: string; name: string; role: string }) => void;
 };
 
-const KNOWN_USERS = [
-  { username: "admin", password: "admin123", id: "admin", name: "Administrator", role: "Admin" },
-  { username: "user", password: "user123", id: "u1", name: "Daniel Sardalla", role: "Intern" },
-];
-
 export default function Login({ onLoginSuccess }: LoginProps) {
-  const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -33,27 +29,33 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     }
   }, [isForgotMode]);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     setIsLoading(true);
     setError(null);
 
-    window.setTimeout(() => {
-      const matchedUser = KNOWN_USERS.find(
-        (user) =>
-          user.username.trim().toLowerCase() === username.trim().toLowerCase() &&
-          user.password === password
+    try {
+      const result = await login({
+        email,
+        password,
+      });
+
+      localStorage.setItem("token", result.token);
+      localStorage.setItem("user", JSON.stringify(result.user));
+
+      onLoginSuccess({
+        id: String(result.user.id),
+        name: result.user.name,
+        role: result.user.role,
+      });
+    } catch (err: any) {
+      setError(
+        err.response?.data?.message || "Invalid email or password."
       );
-
-      if (matchedUser) {
-        setIsLoading(false);
-        onLoginSuccess({ id: matchedUser.id, name: matchedUser.name, role: matchedUser.role });
-        return;
-      }
-
+    } finally {
       setIsLoading(false);
-      setError("Invalid username or password. Please use the demo credentials shown below.");
-    }, 1200);
+    }
   };
 
   const handleResetPassword = (e: FormEvent<HTMLFormElement>) => {
@@ -127,10 +129,10 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   type="text"
                   placeholder="Username"
                   autoComplete="username"
-                  value={username}
+                  value={email}
                   onChange={(e) => {
                     clearError();
-                    setUsername(e.target.value);
+                    setEmail(e.target.value);
                   }}
                   required
                   className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all hover:border-slate-300 focus:border-[#106fb8] focus:bg-white focus:ring-4 focus:ring-[#106fb8]/10"

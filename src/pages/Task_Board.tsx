@@ -19,15 +19,31 @@ import type { NewTaskFormData } from "./New_Task";
 import "./Task_Board.css";
 
 export interface Task {
-  id: string | number;
-  task: string;
-  description?: string;
-  creator: string;
-  assignedTo: string;
-  createdOn: string;
+  id: number;
+
+  title: string;
+  description: string | null;
+
   status: string;
-  dueDate: string;
   priority: string;
+
+  dueDate: string | null;
+  createdAt: string;
+
+  createdBy: number;
+  assignedTo: number | null;
+
+  creator: {
+    id: number;
+    name: string;
+    email: string;
+  };
+
+  assignee: {
+    id: number;
+    name: string;
+    email: string;
+  } | null;
 }
 
 export interface TaskGroup {
@@ -49,7 +65,11 @@ type TaskBoardProps = {
   onTasksChange: (tasks: Task[]) => void;
   highlightTaskId?: number | null;
   onHighlightHandled?: () => void;
-  currentUser?: { id: string; name: string; role?: string };
+  currentUser?: {
+  id: number;
+  name: string;
+  role?: string;
+};
 };
 
 const PRIORITIES = ["Low", "Medium", "High", "Critical"];
@@ -61,14 +81,7 @@ function getEffectiveStatus(task: Task): string {
     return "Completed";
   }
 
-  if (
-    task.status === "To Be Assigned" ||
-    task.status === "Backlog" ||
-    task.status === "Pending" ||
-    task.assignedTo === "Open" ||
-    task.assignedTo === "Unassigned" ||
-    !task.assignedTo
-  ) {
+  if (task.assignedTo === null) {
     return "To Be Assigned";
   }
 
@@ -76,10 +89,10 @@ function getEffectiveStatus(task: Task): string {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const taskDueDate = new Date(task.dueDate);
-    taskDueDate.setHours(0, 0, 0, 0);
+    const dueDate = new Date(task.dueDate);
+    dueDate.setHours(0, 0, 0, 0);
 
-    if (taskDueDate < today) {
+    if (dueDate < today) {
       return "Unfinished";
     }
   }
@@ -198,9 +211,9 @@ export default function TaskBoard({
       const q = filter.search.toLowerCase();
       result = result.filter(
         (t) =>
-          t.task.toLowerCase().includes(q) ||
-          t.creator.toLowerCase().includes(q) ||
-          t.assignedTo.toLowerCase().includes(q)
+          t.title.toLowerCase().includes(q) ||
+          t.creator.name.toLowerCase().includes(q) ||
+          t.assignee?.name.toLowerCase().includes(q)
       );
     }
 
@@ -215,8 +228,8 @@ export default function TaskBoard({
     }
 
     result.sort((a, b) => {
-      const timeA = new Date(a.createdOn).getTime();
-      const timeB = new Date(b.createdOn).getTime();
+      const timeA = new Date(a.createdAt).getTime();
+      const timeB = new Date(b.createdAt).getTime();
       return filter.sort === "asc" ? timeA - timeB : timeB - timeA;
     });
 
@@ -255,50 +268,88 @@ export default function TaskBoard({
     }
   };
 
-  const handleUpdateTaskStatus = async (taskId: string | number, newStatus: string) => {
-    try {
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
+const handleUpdateTaskStatus = async (
+  taskId: number,
+  newStatus: string
+) => {
+  try {
+    const response = await fetch(`/api/tasks/${taskId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        status: newStatus,
+      }),
+    });
 
-      if (response.ok) {
-        const updated = tasks.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t));
-        onTasksChange(updated);
-        if (selectedTask?.id === taskId) {
-          setSelectedTask((prev) => (prev ? { ...prev, status: newStatus } : null));
-        }
-      }
-    } catch (err) {
-      console.error("Error updating task status:", err);
+    if (!response.ok) {
+      throw new Error("Failed to update task status");
     }
-  };
 
-  const handleTakeTask = async (taskId: string | number) => {
-    const assigneeName = currentUser?.name || "You";
-    try {
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ assignedTo: assigneeName, status: "To Do" }),
-      });
+    const updatedTasks = tasks.map((task) =>
+      task.id === taskId
+        ? {
+            ...task,
+            status: newStatus,
+          }
+        : task
+    );
 
-      if (response.ok) {
-        const updated = tasks.map((t) =>
-          t.id === taskId ? { ...t, assignedTo: assigneeName, status: "To Do" } : t
-        );
-        onTasksChange(updated);
-        if (selectedTask?.id === taskId) {
-          setSelectedTask((prev) =>
-            prev ? { ...prev, assignedTo: assigneeName, status: "To Do" } : null
-          );
-        }
-      }
-    } catch (err) {
-      console.error("Error claiming task:", err);
+    onTasksChange(updatedTasks);
+
+    if (selectedTask?.id === taskId) {
+      setSelectedTask((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: newStatus,
+            }
+          : null
+      );
     }
-  };
+  } catch (error) {
+    console.error("Error updating task status:", error);
+  }
+};
+
+const handleTakeTask = async (taskId: number) => {
+  if (!currentUser) return;
+
+  try {
+    const response = await fetch(`/api/tasks/${taskId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        assignedTo: Number(currentUser.id),
+        status: "To Do",
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to take task");
+    }
+
+    const data = await response.json();
+
+    const updatedTask: Task = data.task;
+
+    onTasksChange(
+      tasks.map((task) =>
+        task.id === taskId ? updatedTask : task
+      )
+    );
+
+    if (selectedTask?.id === taskId) {
+      setSelectedTask(updatedTask);
+    }
+
+  } catch (error) {
+    console.error("Error claiming task:", error);
+  }
+};
 
   return (
     <div className="task-board-view">
@@ -423,8 +474,8 @@ function TaskDetailsModal({
 }: {
   task: Task;
   onClose: () => void;
-  onStatusChange: (taskId: string | number, status: string) => void;
-  onTakeTask: (taskId: string | number) => void;
+  onStatusChange: (taskId: number, status: string) => void;
+  onTakeTask: (taskId: number) => void;
 }) {
   const effectiveStatus = getEffectiveStatus(task);
   const isUnassigned = effectiveStatus === "To Be Assigned";
@@ -437,7 +488,7 @@ function TaskDetailsModal({
             <span className="text-xs font-bold uppercase tracking-wider text-[#106fb8]">
               Task Details
             </span>
-            <h2 className="text-xl font-extrabold text-slate-900 leading-snug">{task.task}</h2>
+            <h2 className="text-xl font-extrabold text-slate-900 leading-snug">{task.title}</h2>
           </div>
           <button
             type="button"
@@ -463,8 +514,12 @@ function TaskDetailsModal({
           <div className="flex items-center gap-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100">
             <User className="w-4 h-4 text-[#106fb8]" />
             <div>
-              <p className="text-xs text-slate-400 font-medium">Created By</p>
-              <p className="font-semibold text-slate-800">{task.creator}</p>
+              <p className="text-xs text-slate-400 font-medium">
+                Created By
+              </p>
+              <p className="font-semibold text-slate-800">
+                {task.creator.name}
+              </p>
             </div>
           </div>
 
@@ -472,8 +527,12 @@ function TaskDetailsModal({
             <div className="flex items-center gap-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100">
               <UserCheck className="w-4 h-4 text-[#106fb8]" />
               <div>
-                <p className="text-xs text-slate-400 font-medium">Assigned To</p>
-                <p className="font-semibold text-slate-800">{task.assignedTo}</p>
+                <p className="text-xs text-slate-400 font-medium">
+                  Assigned To
+                </p>
+                <p className="font-semibold text-slate-800">
+                  {task.assignedTo ? task.assignee?.name : "Unassigned"}
+                </p>
               </div>
             </div>
           )}
@@ -481,7 +540,9 @@ function TaskDetailsModal({
           <div className="flex items-center gap-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100">
             <Tag className="w-4 h-4 text-[#106fb8]" />
             <div>
-              <p className="text-xs text-slate-400 font-medium">Priority</p>
+              <p className="text-xs text-slate-400 font-medium">
+                Priority
+              </p>
               <span
                 className={`inline-block text-xs font-bold px-2 py-0.5 rounded-full mt-0.5 ${
                   task.priority === "High" || task.priority === "Critical"
@@ -497,8 +558,14 @@ function TaskDetailsModal({
           <div className="flex items-center gap-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100">
             <Calendar className="w-4 h-4 text-[#106fb8]" />
             <div>
-              <p className="text-xs text-slate-400 font-medium">Due Date</p>
-              <p className="font-semibold text-slate-800">{formatDate(task.dueDate)}</p>
+              <p className="text-xs text-slate-400 font-medium">
+                Due Date
+              </p>
+              <p className="font-semibold text-slate-800">
+                {task.dueDate
+                  ? formatDate(task.dueDate)
+                  : "No due date"}
+              </p>
             </div>
           </div>
         </div>
@@ -522,28 +589,30 @@ function TaskDetailsModal({
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
-          {isUnassigned ? (
+          <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+            {isUnassigned ? (
+              <button
+                type="button"
+                onClick={() => onTakeTask(task.id)}
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#106fb8] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#0d5ca0] transition cursor-pointer"
+              >
+                <CheckCircle2 size={16} />
+                Take This Task
+              </button>
+            ) : (
+              <div className="text-xs text-slate-400 font-medium">
+                Assigned to {task.assignedTo ? task.assignee?.name : "Unassigned"}
+              </div>
+            )}
+
             <button
               type="button"
-              onClick={() => onTakeTask(task.id)}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#106fb8] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#0d5ca0] transition cursor-pointer"
+              onClick={onClose}
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
             >
-              <CheckCircle2 size={16} />
-              Take This Task
+              Close
             </button>
-          ) : (
-            <div className="text-xs text-slate-400 font-medium">Assigned to {task.assignedTo}</div>
-          )}
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-          >
-            Close
-          </button>
-        </div>
+          </div>
       </div>
     </div>
   );
@@ -722,16 +791,28 @@ function TaskSection({
                     task.id === highlightTaskId ? "highlighted-task-row" : ""
                   }`}
                 >
-                  <td className="td-cell font-semibold text-slate-800">{task.task}</td>
-                  <td className="td-cell text-slate-600">{task.creator}</td>
-                  <td className="td-cell text-slate-600">{task.assignedTo}</td>
-                  <td className="td-cell text-slate-500">{formatDate(task.createdOn)}</td>
-                  <td className="td-cell text-slate-600">{formatDate(task.dueDate)}</td>
+                  <td className="td-cell font-semibold text-slate-800">
+                    {task.title}
+                  </td>
+
+                  <td className="td-cell text-slate-600">
+                    {task.creator.name}
+                  </td>
+
+                  <td className="td-cell text-slate-600">
+                    {task.assignedTo ? task.assignee?.name : "Unassigned"}
+                  </td>
+
+                  <td className="td-cell text-slate-500">
+                    {formatDate(task.createdAt)}
+                  </td>
+
+                  <td className="td-cell text-slate-600">
+                    {task.dueDate ? formatDate(task.dueDate) : "-"}
+                  </td>
+
                   <td className="td-cell viewed-by-cell">
                     <div className="views-container">
-                      <div className="eye-circle">
-                        <Eye size={11} />
-                      </div>
                       <div className="eye-circle">
                         <Eye size={11} />
                       </div>
