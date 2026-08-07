@@ -193,36 +193,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 Forgot password?
               </button>
             </div>
-
-            {/* Demo Hint Banner */}
-            <div className="rounded-xl border border-sky-100 bg-sky-50/80 p-3 text-[11px] text-slate-600">
-              <div className="font-semibold text-slate-800">Demo logins:</div>
-              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUsername("admin");
-                    setPassword("admin123");
-                    clearError();
-                  }}
-                  className="rounded-xl bg-white px-3 py-2 text-left text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-100"
-                >
-                  admin / admin123
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUsername("user");
-                    setPassword("user123");
-                    clearError();
-                  }}
-                  className="rounded-xl bg-white px-3 py-2 text-left text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-100"
-                >
-                  user / user123
-                </button>
-              </div>
-            </div>
-
+            
             {/* Submit */}
             <button
               type="submit"
